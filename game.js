@@ -80,6 +80,22 @@ let bolts = [];
 let isOverloading = false;
 let overloadEndTime = 0;
 
+// Multiplayer Variables
+let peer = null;
+let conn = null;
+let myId = '';
+let remotePlayer = {
+    x: -100, y: -100,
+    hp: 100, maxHp: 100,
+    active: false,
+    weapon: 'bow',
+    isCharging: false,
+    chargeProgress: 0
+};
+let isPvP = false;
+let isCoop = false;
+let isHost = false;
+
 const GRAVITY = 0.08;
 const MAX_PULL = 150;
 const COLOR = '#ffffff';
@@ -487,12 +503,16 @@ class Arrow {
                         damage *= 2.5; // Massive damage boost during Groggy!
                         isCrit = true;
                     }
-                    boss.hp = Math.max(0, boss.hp - damage);
-                    bossHpFill.style.width = (boss.hp / boss.maxHp * 100) + '%';
-                    if (boss.hp <= 0) {
-                        boss.active = false; bossHpContainer.classList.add('hidden');
-                        bossModeBtn.textContent = 'RIFT CONQUERED';
-                        impactFlash = 1.5; shakeAmount = 100;
+                    if (isCoop && !isHost) {
+                        sendData({ type: 'boss_damage', damage: damage });
+                    } else {
+                        boss.hp = Math.max(0, boss.hp - damage);
+                        bossHpFill.style.width = (boss.hp / boss.maxHp * 100) + '%';
+                        if (boss.hp <= 0) {
+                            boss.active = false; bossHpContainer.classList.add('hidden');
+                            bossModeBtn.textContent = 'RIFT CONQUERED';
+                            impactFlash = 1.5; shakeAmount = 100;
+                        }
                     }
                 } else {
                     score += damage;
@@ -616,14 +636,18 @@ class HammerProjectile {
                         damage *= 2.5;
                         isCrit = true;
                     }
-                    boss.hp = Math.max(0, boss.hp - damage);
-                    bossHpFill.style.width = (boss.hp / boss.maxHp * 100) + '%';
-                    if (boss.hp <= 0) {
-                        boss.active = false;
-                        bossHpContainer.classList.add('hidden');
-                        bossModeBtn.textContent = 'RIFT CONQUERED';
-                        impactFlash = 1.5;
-                        shakeAmount = 100;
+                    if (isCoop && !isHost) {
+                        sendData({ type: 'boss_damage', damage: damage });
+                    } else {
+                        boss.hp = Math.max(0, boss.hp - damage);
+                        bossHpFill.style.width = (boss.hp / boss.maxHp * 100) + '%';
+                        if (boss.hp <= 0) {
+                            boss.active = false;
+                            bossHpContainer.classList.add('hidden');
+                            bossModeBtn.textContent = 'RIFT CONQUERED';
+                            impactFlash = 1.5;
+                            shakeAmount = 100;
+                        }
                     }
                 } else {
                     score += damage;
@@ -1563,15 +1587,30 @@ window.addEventListener('mouseup', () => {
         const power = 0.1 + (tier * 0.05) + (starLevel * 0.02);
         
         if (currentWeapon === 'bow') {
-            arrows.push(new Arrow(startX, startY, Math.cos(angle) * limitedDist * power, Math.sin(angle) * limitedDist * power, tier, starLevel));
+            const arrow = new Arrow(startX, startY, Math.cos(angle) * limitedDist * power, Math.sin(angle) * limitedDist * power, tier, starLevel);
+            arrows.push(arrow);
+            if (isCoop) {
+                sendData({
+                    type: 'shoot',
+                    weapon: 'bow',
+                    arrow: { x: startX, y: startY, angle: angle, power: power, tier: tier, stars: starLevel }
+                });
+            }
             shakeAmount = 1 + (tier * 0.5) + (starLevel * 1);
             Sounds.fire(tier); if (starLevel >= 10) impactFlash = 1;
         } else if (currentWeapon === 'hammer') {
             if (!isHammerThrown) {
-                hammers.push(new HammerProjectile(startX, startY, Math.cos(angle) * limitedDist * power, Math.sin(angle) * limitedDist * power, tier, starLevel));
+                const hammer = new HammerProjectile(startX, startY, Math.cos(angle) * limitedDist * power, Math.sin(angle) * limitedDist * power, tier, starLevel);
+                hammers.push(hammer);
+                if (isCoop) {
+                    sendData({
+                        type: 'shoot',
+                        weapon: 'hammer',
+                        hammer: { x: startX, y: startY, tx: startX + Math.cos(angle) * 100, ty: startY + Math.sin(angle) * 100, tier: tier, stars: starLevel, vx: hammer.vx, vy: hammer.vy, state: hammer.state }
+                    });
+                }
                 isHammerThrown = true;
                 shakeAmount = 5 + (tier * 1) + (starLevel * 2);
-                // 망치 발사 시 웅장하게 천둥 소리 재생
                 Sounds.fire(tier); if (starLevel >= 10) impactFlash = 1;
             }
         } else if (currentWeapon === 'swing') {
@@ -1615,10 +1654,178 @@ function drawCinematicEffects() {
     }
 }
 
+// --- Multiplayer Functions ---
+function initMultiplayer() {
+    const peerIdDisplay = document.getElementById('peer-id-display');
+    const remoteIdInput = document.getElementById('remote-id-input');
+    const connectBtn = document.getElementById('connect-btn');
+    const statusDisplay = document.getElementById('connection-status');
+
+    peer = new Peer();
+
+    peer.on('open', (id) => {
+        myId = id;
+        peerIdDisplay.innerText = `YOUR ID: ${id}`;
+        statusDisplay.innerText = 'Ready to connect';
+    });
+
+    peer.on('connection', (c) => {
+        if (conn) conn.close();
+        conn = c;
+        setupConnection();
+        isHost = true;
+        statusDisplay.innerText = 'FRIEND CONNECTED';
+        isCoop = true;
+    });
+
+    connectBtn.addEventListener('click', () => {
+        const remoteId = remoteIdInput.value;
+        if (!remoteId) return;
+        
+        if (conn) conn.close();
+        conn = peer.connect(remoteId);
+        setupConnection();
+        isHost = false;
+        statusDisplay.innerText = 'CONNECTING...';
+    });
+
+    peer.on('error', (err) => {
+        statusDisplay.innerText = `Error: ${err.type}`;
+    });
+}
+
+function setupConnection() {
+    conn.on('open', () => {
+        document.getElementById('connection-status').innerText = 'CONNECTED';
+        isCoop = true;
+        sendData({ type: 'sync_request' });
+    });
+
+    conn.on('data', (data) => {
+        handleIncomingData(data);
+    });
+
+    conn.on('close', () => {
+        document.getElementById('connection-status').innerText = 'DISCONNECTED';
+        remotePlayer.active = false;
+        isCoop = false;
+        conn = null;
+    });
+}
+
+function sendData(data) {
+    if (conn && conn.open) {
+        conn.send(data);
+    }
+}
+
+function handleIncomingData(data) {
+    switch (data.type) {
+        case 'player_pos':
+            remotePlayer.x = data.x;
+            remotePlayer.y = data.y;
+            remotePlayer.active = true;
+            remotePlayer.weapon = data.weapon;
+            remotePlayer.isCharging = data.isCharging;
+            remotePlayer.chargeProgress = data.chargeProgress;
+            break;
+        case 'player_hp':
+            remotePlayer.hp = data.hp;
+            break;
+        case 'shoot':
+            if (data.weapon === 'bow') {
+                arrows.push(new Arrow(data.arrow.x, data.arrow.y, data.arrow.angle, data.arrow.power, data.arrow.tier, data.arrow.stars));
+            } else if (data.weapon === 'hammer') {
+                const h = new Hammer(data.hammer.x, data.hammer.y, data.hammer.tx, data.hammer.ty, data.hammer.tier, data.hammer.stars);
+                h.vx = data.hammer.vx; h.vy = data.hammer.vy; h.state = data.hammer.state;
+                hammers.push(h);
+            }
+            Sounds.shoot(data.power);
+            break;
+        case 'boss_sync':
+            if (!isHost) {
+                boss.hp = data.hp;
+                boss.active = data.active;
+                boss.x = data.x;
+                boss.y = data.y;
+                if (data.active) {
+                    bossHpContainer.classList.remove('hidden');
+                    bossHpFill.style.width = (boss.hp / boss.maxHp * 100) + '%';
+                } else {
+                    bossHpContainer.classList.add('hidden');
+                }
+            }
+            break;
+        case 'pvp_hit':
+            playerHP -= data.damage;
+            shockwaves.push(new Ripple(data.x, data.y, 50));
+            floatingTexts.push(new FloatingText(data.x, data.y, `-${Math.floor(data.damage)}`, '#ff003c'));
+            document.getElementById('player-hp-fill').style.width = (playerHP / maxPlayerHP * 100) + '%';
+            break;
+        case 'boss_damage':
+            if (isHost) {
+                boss.hp -= data.damage;
+                bossHpFill.style.width = (boss.hp / boss.maxHp * 100) + '%';
+                if (boss.hp <= 0) {
+                    boss.active = false;
+                    bossHpContainer.classList.add('hidden');
+                }
+            }
+            break;
+    }
+}
+
+function drawRemotePlayer() {
+    if (!remotePlayer.active) return;
+    ctx.save();
+    ctx.translate(remotePlayer.x, remotePlayer.y);
+    
+    // Draw remote player body (as a simple archer silhouette)
+    ctx.fillStyle = '#00ffd2';
+    ctx.globalAlpha = 0.6;
+    ctx.beginPath();
+    ctx.arc(0, 0, 15, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Draw Name/HP
+    ctx.fillStyle = 'white';
+    ctx.font = '10px Inter';
+    ctx.textAlign = 'center';
+    ctx.fillText(`FRIEND (HP: ${Math.floor(remotePlayer.hp)})`, 0, -25);
+    
+    ctx.restore();
+}
+
+initMultiplayer();
+
 function update() {
     ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Multiplayer Sync
+    if (isCoop) {
+        sendData({
+            type: 'player_pos',
+            x: currentX || 50,
+            y: currentY || 300,
+            weapon: currentWeapon,
+            isCharging: isDragging,
+            chargeProgress: chargeStartTime ? (Date.now() - chargeStartTime) / 1000 : 0
+        });
+        
+        if (isHost && boss.active) {
+            sendData({
+                type: 'boss_sync',
+                hp: boss.hp,
+                active: boss.active,
+                x: boss.x,
+                y: boss.y
+            });
+        }
+    }
+
     if (shakeAmount > 0) { ctx.translate((Math.random() - 0.5) * shakeAmount, (Math.random() - 0.5) * shakeAmount); shakeAmount *= 0.85; }
     drawTarget();
+    drawRemotePlayer();
     particles = particles.filter(p => { p.draw(); return p.update(); });
     ripples = ripples.filter(r => { r.draw(); return r.update(); });
     bolts = bolts.filter(b => { b.draw(); return b.update(); });
@@ -1627,8 +1834,37 @@ function update() {
     shockwaves = shockwaves.filter(s => { s.draw(); return s.update(); });
     bossProjectiles = bossProjectiles.filter(bp => { bp.draw(); return bp.update(); });
     drawBow();
-    arrows.forEach(a => { a.draw(); a.update(); });
-    hammers = hammers.filter(h => { h.draw(); return h.update(); });
+    arrows.forEach(a => { 
+        a.draw(); 
+        a.update(); 
+        
+        // PvP Collision Check
+        if (isCoop && remotePlayer.active) {
+            const dx = a.x - remotePlayer.x;
+            const dy = a.y - remotePlayer.y;
+            if (Math.sqrt(dx * dx + dy * dy) < 25) {
+                const damage = (5 + (a.tier * 2)) * (1 + (a.stars * 0.5));
+                sendData({ type: 'pvp_hit', damage: damage, x: a.x, y: a.y });
+                a.life = 0; // Destroy arrow
+            }
+        }
+    });
+    hammers = hammers.filter(h => { 
+        const active = h.update(); 
+        h.draw(); 
+        
+        // PvP Collision Check for Hammers
+        if (isCoop && remotePlayer.active && h.state === 'flying') {
+            const dx = h.x - remotePlayer.x;
+            const dy = h.y - remotePlayer.y;
+            if (Math.sqrt(dx * dx + dy * dy) < 30) {
+                const damage = (10 + (h.tier * 5)) * (1 + (h.stars * 1.0));
+                sendData({ type: 'pvp_hit', damage: damage, x: h.x, y: h.y });
+                h.state = 'returning';
+            }
+        }
+        return active;
+    });
     swings = swings.filter(s => { s.draw(); return s.update(); });
     floatingTexts = floatingTexts.filter(ft => { ft.draw(); return ft.update(); });
     drawCinematicEffects();

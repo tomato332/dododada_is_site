@@ -5,9 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>궁수 마스터: 과녁 맞추기</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
 </head>
 <body>
     <div id="game-container">
+        <div id="multiplayer-ui">
+            <div id="peer-id-display">Connecting to network...</div>
+            <input type="text" id="remote-id-input" placeholder="Enter Friend's ID">
+            <button id="connect-btn">CONNECT FOR PVP/PVE</button>
+            <div id="connection-status"></div>
+        </div>
         <div id="combo-display"></div>
         <div id="analysis-panel">
             <div class="panel-header">EVOLUTION ANALYSIS</div>
