@@ -95,6 +95,9 @@ let remotePlayer = {
 let isPvP = false;
 let isCoop = false;
 let isHost = false;
+let isDead = false;
+let invulnerableUntil = 0;
+let countdownRemaining = 0;
 
 const GRAVITY = 0.08;
 const MAX_PULL = 150;
@@ -210,21 +213,25 @@ class Ripple {
 
 class FloatingText {
     constructor(x, y, text, color, isCrit = false) {
-        this.x = x + (Math.random() - 0.5) * 20;
-        this.y = y - 10;
+        this.x = x + (Math.random() - 0.5) * 40;
+        this.y = y - 20;
         this.text = text;
         this.color = color;
         this.isCrit = isCrit;
         this.life = 1.0;
-        this.vy = isCrit ? -2.5 : -1.5;
-        this.vx = (Math.random() - 0.5) * 1.5;
-        this.size = isCrit ? 22 : 14;
+        this.vy = isCrit ? -8 : -4;
+        this.vx = (Math.random() - 0.5) * 4;
+        this.gravity = 0.2;
+        this.size = isCrit ? 36 : 24;
+        this.opacity = 1.0;
+        this.scale = 1.5;
     }
     update() {
         this.x += this.vx;
         this.y += this.vy;
-        this.vy *= 0.98;
-        this.life -= 0.02;
+        this.vy += this.gravity;
+        this.life -= 0.015;
+        this.scale = Math.max(1, this.scale * 0.95);
         return this.life > 0;
     }
     draw() {
@@ -232,19 +239,36 @@ class FloatingText {
         ctx.globalAlpha = this.life;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
+        
+        const displayColor = this.isCrit ? `hsl(${(Date.now() / 2) % 360}, 100%, 70%)` : this.color;
+        
+        ctx.translate(this.x, this.y);
+        ctx.scale(this.scale, this.scale);
+        
         if (this.isCrit) {
-            ctx.font = `900 ${this.size}px monospace`;
-            ctx.shadowBlur = 15;
-            ctx.shadowColor = this.color;
-            ctx.fillStyle = this.color;
-            ctx.fillText(this.text, this.x, this.y);
-            ctx.strokeStyle = '#000000';
-            ctx.lineWidth = 2;
-            ctx.strokeText(this.text, this.x, this.y);
+            ctx.font = `italic 900 ${this.size}px 'Arial Black', sans-serif`;
+            ctx.shadowBlur = 20;
+            ctx.shadowColor = displayColor;
+            
+            // Outline
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 6;
+            ctx.strokeText(this.text, 0, 0);
+            
+            // Gradient fill
+            const grad = ctx.createLinearGradient(0, -this.size/2, 0, this.size/2);
+            grad.addColorStop(0, '#fff');
+            grad.addColorStop(0.5, displayColor);
+            grad.addColorStop(1, '#ff003c');
+            ctx.fillStyle = grad;
+            ctx.fillText(this.text, 0, 0);
         } else {
-            ctx.font = `700 ${this.size}px monospace`;
-            ctx.fillStyle = this.color;
-            ctx.fillText(this.text, this.x, this.y);
+            ctx.font = `900 ${this.size}px 'Arial Black', sans-serif`;
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 4;
+            ctx.strokeText(this.text, 0, 0);
+            ctx.fillStyle = displayColor;
+            ctx.fillText(this.text, 0, 0);
         }
         ctx.restore();
     }
@@ -1009,8 +1033,17 @@ function drawTarget() {
                 Sounds.overload();
                 impactFlash = 0.5;
             } else {
+                // Teleport Effect (Shockwave at old location)
+                shockwaves.push(new Shockwave(boss.x, boss.y, boss.radius * 2, '#7000ff'));
+                for(let i=0; i<30; i++) particles.push(new Particle(boss.x, boss.y, (Math.random()-0.5)*15, (Math.random()-0.5)*15, '#7000ff'));
+
                 boss.x = 200 + Math.random() * (canvas.width - 400);
                 boss.y = 100 + Math.random() * (canvas.height - 200);
+                
+                // Teleport Effect (Shockwave at new location)
+                shockwaves.push(new Shockwave(boss.x, boss.y, boss.radius * 2, '#00ffd2'));
+                for(let i=0; i<30; i++) particles.push(new Particle(boss.x, boss.y, (Math.random()-0.5)*15, (Math.random()-0.5)*15, '#00ffd2'));
+
                 boss.lastTeleport = Date.now();
                 impactFlash = 0.3;
             }
@@ -1757,10 +1790,12 @@ function handleIncomingData(data) {
             }
             break;
         case 'pvp_hit':
-            playerHP -= data.damage;
-            shockwaves.push(new Ripple(data.x, data.y, 50));
-            floatingTexts.push(new FloatingText(data.x, data.y, `-${Math.floor(data.damage)}`, '#ff003c'));
-            document.getElementById('player-hp-fill').style.width = (playerHP / maxPlayerHP * 100) + '%';
+            if (isPvP && Date.now() > invulnerableUntil) {
+                playerHP -= data.damage;
+                shockwaves.push(new Ripple(data.x, data.y, 50));
+                floatingTexts.push(new FloatingText(data.x, data.y, `${Math.floor(data.damage)}`, '#ff003c', data.damage > 50));
+                updateHPBar();
+            }
             break;
         case 'boss_damage':
             if (isHost) {
@@ -1781,17 +1816,30 @@ function drawRemotePlayer() {
     ctx.translate(remotePlayer.x, remotePlayer.y);
     
     // Draw remote player body (as a simple archer silhouette)
-    ctx.fillStyle = '#00ffd2';
-    ctx.globalAlpha = 0.6;
+    ctx.fillStyle = '#ff3e00';
+    ctx.globalAlpha = 0.8;
+    ctx.shadowBlur = 10;
+    ctx.shadowColor = '#ff3e00';
     ctx.beginPath();
     ctx.arc(0, 0, 15, 0, Math.PI * 2);
     ctx.fill();
     
-    // Draw Name/HP
+    // HP Bar UI above player
+    const barWidth = 40;
+    const barHeight = 4;
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+    ctx.fillRect(-barWidth/2, -30, barWidth, barHeight);
+    
+    const hpRatio = Math.max(0, remotePlayer.hp / remotePlayer.maxHp);
+    ctx.fillStyle = hpRatio > 0.3 ? '#00ffd2' : '#ff003c';
+    ctx.fillRect(-barWidth/2, -30, barWidth * hpRatio, barHeight);
+    
+    // HP Percentage Text
     ctx.fillStyle = 'white';
-    ctx.font = '10px Inter';
+    ctx.font = 'bold 10px Inter';
     ctx.textAlign = 'center';
-    ctx.fillText(`FRIEND (HP: ${Math.floor(remotePlayer.hp)})`, 0, -25);
+    ctx.globalAlpha = 1.0;
+    ctx.fillText(`${Math.ceil(hpRatio * 100)}%`, 0, -35);
     
     ctx.restore();
 }
@@ -1890,17 +1938,10 @@ function update() {
             p.draw();
             if (p.isExploded && p.timer === p.duration) {
                 const dx = (currentX || 0) - p.x, dy = (currentY || 0) - p.y;
-                if (Math.sqrt(dx * dx + dy * dy) < p.radius) {
+                if (Math.sqrt(dx * dx + dy * dy) < p.radius && Date.now() > invulnerableUntil) {
                     playerHP -= 20;
-                    document.getElementById('player-hp-fill').style.width = (playerHP / maxPlayerHP * 100) + '%';
+                    updateHPBar();
                     impactFlash = 0.5; shakeAmount = 40;
-                    if (playerHP <= 0) {
-                        boss.active = false;
-                        bossHpContainer.classList.add('hidden');
-                        bossModeBtn.textContent = 'RIFT REJECTED';
-                        playerHP = 100;
-                        document.getElementById('player-hp-fill').style.width = '100%';
-                    }
                 }
             }
             return active;
@@ -1917,18 +1958,75 @@ function update() {
 
 // Consolidated into the single mousemove listener above
 
+function startCountdown(callback) {
+    const countdownEl = document.getElementById('intro-countdown');
+    countdownEl.classList.remove('hidden');
+    countdownRemaining = 3;
+    invulnerableUntil = Date.now() + 4000; // 3s countdown + 1s grace
+    
+    const interval = setInterval(() => {
+        countdownEl.innerText = countdownRemaining;
+        if (countdownRemaining <= 0) {
+            clearInterval(interval);
+            countdownEl.classList.add('hidden');
+            if (callback) callback();
+        }
+        countdownRemaining--;
+    }, 1000);
+}
+
 bossModeBtn.addEventListener('click', () => {
+    if (isPvP) return; // Can't enter boss during PvP
     boss.active = !boss.active;
     if (boss.active) {
-        boss.hp = boss.maxHp;
-        bossHpFill.style.width = '100%';
-        bossHpContainer.classList.remove('hidden');
+        startCountdown(() => {
+            boss.hp = boss.maxHp;
+            bossHpFill.style.width = '100%';
+            bossHpContainer.classList.remove('hidden');
+        });
         bossModeBtn.textContent = 'EXIT RIFT';
+        bossModeBtn.classList.add('active');
     } else {
         bossHpContainer.classList.add('hidden');
         bossModeBtn.textContent = 'ENTER BOSS RIFT';
+        bossModeBtn.classList.remove('active');
     }
 });
+
+const pvpModeBtn = document.getElementById('pvp-mode-btn');
+pvpModeBtn.addEventListener('click', () => {
+    if (boss.active) return;
+    isPvP = !isPvP;
+    if (isPvP) {
+        startCountdown();
+        pvpModeBtn.textContent = 'LEAVE ARENA';
+        pvpModeBtn.classList.add('active');
+        playerHP = 100;
+        isDead = false;
+        updateHPBar();
+    } else {
+        pvpModeBtn.textContent = 'DUEL ARENA';
+        pvpModeBtn.classList.remove('active');
+    }
+});
+
+function updateHPBar() {
+    const hpPercent = Math.max(0, (playerHP / maxPlayerHP) * 100);
+    document.getElementById('player-hp-fill').style.width = hpPercent + '%';
+    document.getElementById('player-hp-percent').innerText = Math.ceil(hpPercent) + '%';
+    
+    if (playerHP <= 0 && !isDead) {
+        isDead = true;
+        Sounds.overload(); // Play a sound for death
+        floatingTexts.push(new FloatingText(currentX || canvas.width/2, currentY || canvas.height/2, "REJECTED", "#ff003c", true));
+        
+        setTimeout(() => {
+            playerHP = 100;
+            isDead = false;
+            updateHPBar();
+        }, 3000);
+    }
+}
 
 // Weapon Selector Event Listeners
 const bowBtn = document.getElementById('weapon-bow-btn');
@@ -1969,6 +2067,12 @@ swingBtn.addEventListener('click', () => {
     hammers = [];
     swings = [];
     Sounds.overload();
+});
+
+// Initial cursor state fix
+document.addEventListener('DOMContentLoaded', () => {
+    cursorDot.style.opacity = '1';
+    cursorOutline.style.opacity = '1';
 });
 
 update();
