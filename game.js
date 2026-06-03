@@ -98,6 +98,8 @@ let isHost = false;
 let isDead = false;
 let invulnerableUntil = 0;
 let countdownRemaining = 0;
+let lastTime = performance.now();
+let dt = 1.0;
 
 const GRAVITY = 0.08;
 const MAX_PULL = 150;
@@ -119,7 +121,7 @@ class Bolt {
         }
         this.points.push({ x: targetX, y: targetY });
     }
-    update() { this.life -= 0.1; return this.life > 0; }
+    update() { this.life -= 0.1 * dt; return this.life > 0; }
     draw() {
         ctx.save();
         ctx.strokeStyle = this.color;
@@ -142,8 +144,8 @@ class Particle {
         this.color = color;
     }
     update() {
-        this.x += this.vx; this.y += this.vy;
-        this.life -= 0.02;
+        this.x += this.vx * dt; this.y += this.vy * dt;
+        this.life -= 0.02 * dt;
         return this.life > 0;
     }
     draw() {
@@ -165,7 +167,7 @@ class VoidPattern {
         this.alpha = 0;
     }
     update() {
-        this.timer++;
+        this.timer += dt;
         this.alpha = Math.min(0.6, this.timer / this.duration);
         if (this.timer >= this.duration && !this.isExploded) {
             this.isExploded = true;
@@ -198,8 +200,8 @@ class Ripple {
         this.life = 1.0;
     }
     update() {
-        this.r += 2;
-        this.life -= 0.02;
+        this.r += 2 * dt;
+        this.life -= 0.02 * dt;
         return this.life > 0;
     }
     draw() {
@@ -227,11 +229,11 @@ class FloatingText {
         this.scale = 1.5;
     }
     update() {
-        this.x += this.vx;
-        this.y += this.vy;
-        this.vy += this.gravity;
-        this.life -= 0.015;
-        this.scale = Math.max(1, this.scale * 0.95);
+        this.x += this.vx * dt;
+        this.y += this.vy * dt;
+        this.vy += this.gravity * dt;
+        this.life -= 0.015 * dt;
+        this.scale = Math.max(1, this.scale * Math.pow(0.95, dt));
         return this.life > 0;
     }
     draw() {
@@ -284,8 +286,8 @@ class Shockwave {
         this.life = 1.0;
     }
     update() {
-        this.r += (this.maxR - this.r) * 0.15 + 1;
-        this.life -= 0.04;
+        this.r += ((this.maxR - this.r) * 0.15 + 1) * dt;
+        this.life -= 0.04 * dt;
         return this.life > 0 && this.r < this.maxR;
     }
     draw() {
@@ -468,18 +470,20 @@ class BossProjectile {
 }
 
 class Arrow {
-    constructor(x, y, vx, vy, tier, stars) {
+    constructor(x, y, vx, vy, tier, stars, isRemote = false) {
         this.x = x; this.y = y;
         this.vx = vx; this.vy = vy;
         this.tier = tier;
         this.stars = stars;
         this.isStuck = false;
+        this.isRemote = isRemote;
     }
     update() {
         if (this.isStuck) return;
         
         const oldX = this.x, oldY = this.y;
-        const dt = boss.active ? boss.timeScale : 1.0;
+        const bossTS = boss.active ? boss.timeScale : 1.0;
+        const totalDt = dt * bossTS;
         
         // Boss Gravity Pattern
         if (boss.active && boss.gravityEnabled && !boss.isGroggy) {
@@ -487,15 +491,15 @@ class Arrow {
             const bdist = Math.sqrt(bdx * bdx + bdy * bdy);
             if (bdist < 300) {
                 const force = (1 - bdist / 300) * boss.gravityStrength;
-                this.vx += bdx * force;
-                this.vy += bdy * force;
+                this.vx += bdx * force * totalDt;
+                this.vy += bdy * force * totalDt;
             }
         }
 
-        this.x += this.vx * dt; this.y += this.vy * dt;
-        this.vy += GRAVITY * dt * (1 - (this.tier / 12));
+        this.x += this.vx * totalDt; this.y += this.vy * totalDt;
+        this.vy += GRAVITY * totalDt * (1 - (this.tier / 12));
 
-        if (this.tier > 5 && Math.random() > 0.5) ripples.push(new Ripple(this.x, this.y, this.tier / 2));
+        if (this.tier > 5 && Math.random() > 0.5) ripples.push(new Ripple(this.x, this.y, (this.tier / 2) * totalDt));
         
         // 화살 비행 잔상 궤적 추가
         if (Math.random() > 0.3) {
@@ -504,7 +508,7 @@ class Arrow {
         }
 
         // Sub-stepping to prevent tunneling
-        const steps = Math.ceil(Math.sqrt(this.vx * this.vx + this.vy * this.vy) / (target.radius * 0.5));
+        const steps = Math.ceil(Math.max(1, Math.sqrt(this.vx * this.vx + this.vy * this.vy) * totalDt / (target.radius * 0.5)));
         for (let s = 0; s <= steps; s++) {
             const t = s / steps;
             const checkX = oldX + (this.x - oldX) * t;
@@ -516,7 +520,8 @@ class Arrow {
 
             if (Math.sqrt(dx * dx + dy * dy) < hitRadius) {
                 this.x = checkX; this.y = checkY;
-                this.isStuck = true; this.vx = 0; this.vy = 0;
+                this.isStuck = true; this.hitTime = Date.now();
+                this.vx = 0; this.vy = 0;
                 combo++; lastHitTime = Date.now();
                 const starBonus = this.stars > 0 ? TIER_CONFIG.getPower(this.stars) : 1;
                 let damage = (10 + (this.tier * 20)) * (1 + (combo * 0.1)) * starBonus;
@@ -580,7 +585,7 @@ class Arrow {
 }
 
 class HammerProjectile {
-    constructor(x, y, vx, vy, tier, stars) {
+    constructor(x, y, vx, vy, tier, stars, isRemote = false) {
         this.x = x;
         this.y = y;
         this.vx = vx * 1.4; // 망치는 묵직하게 더 빠르게 날아감
@@ -588,6 +593,7 @@ class HammerProjectile {
         this.tier = tier;
         this.stars = stars;
         this.state = 'flying'; // 'flying' | 'returning'
+        this.isRemote = isRemote;
         this.angle = 0;
         this.rotSpeed = 0.15 + (tier * 0.02) + (stars * 0.05);
         this.width = 24 + tier * 2 + stars * 3;
@@ -597,8 +603,9 @@ class HammerProjectile {
         this.flyDist = 0;
     }
     update() {
-        const dt = boss.active ? boss.timeScale : 1.0;
-        this.angle += this.rotSpeed * dt;
+        const bossTS = boss.active ? boss.timeScale : 1.0;
+        const totalDt = dt * bossTS;
+        this.angle += this.rotSpeed * totalDt;
         const activeColor = this.stars === 10 ? `hsl(${Date.now() % 360}, 100%, 70%)` : (this.stars > 0 ? TIER_CONFIG.COLORS[Math.min(this.stars, TIER_CONFIG.MAX_LEVEL)] : '#00ffd2');
         
         if (Math.random() < 0.5) {
@@ -621,15 +628,15 @@ class HammerProjectile {
                 const bdist = Math.sqrt(bdx * bdx + bdy * bdy);
                 if (bdist < 300) {
                     const force = (1 - bdist / 300) * boss.gravityStrength;
-                    this.vx += bdx * force;
-                    this.vy += bdy * force;
+                    this.vx += bdx * force * totalDt;
+                    this.vy += bdy * force * totalDt;
                 }
             }
             
-            this.x += this.vx * dt;
-            this.y += this.vy * dt;
-            this.vy += GRAVITY * 0.3 * dt; // 중력을 무겁게 적용
-            this.flyDist += Math.sqrt(this.vx * this.vx + this.vy * this.vy) * dt;
+            this.x += this.vx * totalDt;
+            this.y += this.vy * totalDt;
+            this.vy += GRAVITY * 0.3 * totalDt; // 중력을 무겁게 적용
+            this.flyDist += Math.sqrt(this.vx * this.vx + this.vy * this.vy) * totalDt;
 
             if (this.y > canvas.height + 50 || this.flyDist > this.maxDist) {
                 this.state = 'returning';
@@ -722,8 +729,8 @@ class HammerProjectile {
             const speed = 14 + (this.stars * 0.8);
             this.vx = (dx / dist) * speed;
             this.vy = (dy / dist) * speed;
-            this.x += this.vx;
-            this.y += this.vy;
+            this.x += this.vx * totalDt;
+            this.y += this.vy * totalDt;
         }
 
         return true;
@@ -991,13 +998,13 @@ function drawTarget() {
     if (boss.active) {
         // --- 5. TIME WARP LOGIC ---
         // 보스 HP가 낮을수록 가끔 시간을 느리게 만듦
-        if (!boss.isGroggy && Math.random() < 0.005 && Date.now() - boss.lastPatternTime > 5000) {
+        if (!boss.isGroggy && Math.random() < 0.005 * dt && Date.now() - boss.lastPatternTime > 5000) {
             boss.timeScale = 0.3;
             boss.lastPatternTime = Date.now();
             floatingTexts.push(new FloatingText(canvas.width/2, canvas.height/2, 'TIME WARP', '#ff00ff', 30));
         }
         if (boss.timeScale < 1.0 && Date.now() - boss.lastPatternTime > 2000) {
-            boss.timeScale = Math.min(1.0, boss.timeScale + 0.01);
+            boss.timeScale = Math.min(1.0, boss.timeScale + 0.01 * dt);
         }
 
         // Check Groggy Expiry
@@ -1051,7 +1058,7 @@ function drawTarget() {
 
         // Rift Update & Draw
         boss.rifts = boss.rifts.filter(rift => {
-            rift.life -= 0.005;
+            rift.life -= 0.005 * dt;
             ctx.save();
             ctx.globalAlpha = rift.life;
             ctx.shadowBlur = 15; ctx.shadowColor = '#7000ff';
@@ -1070,11 +1077,11 @@ function drawTarget() {
         });
 
         // --- 3. EVENT HORIZON (Guardians) ---
-        if (!boss.isGroggy && boss.guardians.length < 3 && Math.random() < 0.01) {
+        if (!boss.isGroggy && boss.guardians.length < 3 && Math.random() < 0.01 * dt) {
             boss.guardians.push({ angle: Math.random() * Math.PI * 2, distance: 150, radius: 25 });
         }
         boss.guardians.forEach((g, idx) => {
-            g.angle += 0.03 * boss.timeScale;
+            g.angle += 0.03 * boss.timeScale * dt;
             const gx = boss.x + Math.cos(g.angle) * g.distance;
             const gy = boss.y + Math.sin(g.angle) * g.distance;
             
@@ -1272,6 +1279,36 @@ function drawBow() {
     const angle = Math.atan2(dy, dx);
     const timeCharged = Date.now() - chargeStartTime;
     const tier = Math.min(10, Math.floor(dist / 30) + Math.floor(timeCharged / 400));
+
+    // Draw Guide Line (Dashed Line between Drag Start and Current Cursor)
+    ctx.save();
+    ctx.beginPath();
+    ctx.setLineDash([5, 5]);
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+    ctx.lineWidth = 1;
+    ctx.moveTo(startX, startY);
+    ctx.lineTo(currentX, currentY);
+    ctx.stroke();
+
+    // Draw Aim Line (Projected path in the shooting direction)
+    const aimDist = dist * 5; // Project the aim point forward based on pull strength
+    const aimX = startX + Math.cos(angle) * aimDist;
+    const aimY = startY + Math.sin(angle) * aimDist;
+    
+    ctx.beginPath();
+    ctx.setLineDash([8, 4]);
+    ctx.strokeStyle = starLevel > 0 ? TIER_CONFIG.COLORS[Math.min(starLevel, TIER_CONFIG.MAX_LEVEL)] : 'rgba(255, 255, 255, 0.5)';
+    ctx.lineWidth = 1.5;
+    ctx.moveTo(startX, startY);
+    ctx.lineTo(aimX, aimY);
+    ctx.stroke();
+
+    // Draw Aim Reticle at the end of the aim line
+    ctx.beginPath();
+    ctx.setLineDash([]);
+    ctx.arc(aimX, aimY, 5, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.restore();
 
     if (tier >= 10) {
         if (!isStarRolled) {
@@ -1698,8 +1735,22 @@ function initMultiplayer() {
 
     peer.on('open', (id) => {
         myId = id;
-        peerIdDisplay.innerText = `YOUR ID: ${id}`;
+        peerIdDisplay.innerText = `ID: ${id}`;
         statusDisplay.innerText = 'Ready to connect';
+    });
+
+    const copyBtn = document.getElementById('copy-id-btn');
+    copyBtn.addEventListener('click', () => {
+        if (!myId) return;
+        navigator.clipboard.writeText(myId).then(() => {
+            const originalText = copyBtn.innerText;
+            copyBtn.innerText = 'COPIED!';
+            copyBtn.style.background = '#00ff88';
+            setTimeout(() => {
+                copyBtn.innerText = originalText;
+                copyBtn.style.background = '';
+            }, 2000);
+        });
     });
 
     peer.on('connection', (c) => {
@@ -1767,13 +1818,13 @@ function handleIncomingData(data) {
             break;
         case 'shoot':
             if (data.weapon === 'bow') {
-                arrows.push(new Arrow(data.arrow.x, data.arrow.y, data.arrow.angle, data.arrow.power, data.arrow.tier, data.arrow.stars));
+                arrows.push(new Arrow(data.arrow.x, data.arrow.y, data.arrow.angle, data.arrow.power, data.arrow.tier, data.arrow.stars, true));
             } else if (data.weapon === 'hammer') {
-                const h = new Hammer(data.hammer.x, data.hammer.y, data.hammer.tx, data.hammer.ty, data.hammer.tier, data.hammer.stars);
-                h.vx = data.hammer.vx; h.vy = data.hammer.vy; h.state = data.hammer.state;
+                const h = new HammerProjectile(data.hammer.x, data.hammer.y, data.hammer.vx, data.hammer.vy, data.hammer.tier, data.hammer.stars, true);
+                h.state = data.hammer.state;
                 hammers.push(h);
             }
-            Sounds.shoot(data.power);
+            Sounds.fire(data.power || 1);
             break;
         case 'boss_sync':
             if (!isHost) {
@@ -1790,7 +1841,8 @@ function handleIncomingData(data) {
             }
             break;
         case 'pvp_hit':
-            if (isPvP && Date.now() > invulnerableUntil) {
+            // Take damage if in PvP mode OR if the other person is attacking you while connected
+            if (Date.now() > invulnerableUntil) {
                 playerHP -= data.damage;
                 shockwaves.push(new Ripple(data.x, data.y, 50));
                 floatingTexts.push(new FloatingText(data.x, data.y, `${Math.floor(data.damage)}`, '#ff003c', data.damage > 50));
@@ -1806,6 +1858,18 @@ function handleIncomingData(data) {
                     bossHpContainer.classList.add('hidden');
                 }
             }
+            break;
+        case 'pvp_request':
+            document.getElementById('pvp-request-panel').classList.remove('hidden');
+            break;
+        case 'pvp_accept':
+            isPvP = true;
+            document.getElementById('pvp-mode-btn').textContent = 'LEAVE ARENA';
+            document.getElementById('pvp-mode-btn').classList.add('active');
+            startCountdown();
+            break;
+        case 'pvp_decline':
+            alert("Duel request declined.");
             break;
     }
 }
@@ -1846,7 +1910,12 @@ function drawRemotePlayer() {
 
 initMultiplayer();
 
-function update() {
+function update(timestamp) {
+    // High Refresh Rate Fix: Calculate Delta Time
+    const currentTime = timestamp || performance.now();
+    dt = Math.min((currentTime - lastTime) / (1000 / 60), 3.0); // Cap at 3x to prevent huge jumps
+    lastTime = currentTime;
+
     ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, canvas.width, canvas.height);
     
     // Multiplayer Sync
@@ -1871,9 +1940,13 @@ function update() {
         }
     }
 
-    if (shakeAmount > 0) { ctx.translate((Math.random() - 0.5) * shakeAmount, (Math.random() - 0.5) * shakeAmount); shakeAmount *= 0.85; }
+    if (shakeAmount > 0) { 
+        ctx.translate((Math.random() - 0.5) * shakeAmount, (Math.random() - 0.5) * shakeAmount); 
+        shakeAmount *= Math.pow(0.85, dt); 
+    }
     drawTarget();
     drawRemotePlayer();
+    // (Existing filters remain the same as they call .update() which we'll fix in the classes)
     particles = particles.filter(p => { p.draw(); return p.update(); });
     ripples = ripples.filter(r => { r.draw(); return r.update(); });
     bolts = bolts.filter(b => { b.draw(); return b.update(); });
@@ -1882,30 +1955,32 @@ function update() {
     shockwaves = shockwaves.filter(s => { s.draw(); return s.update(); });
     bossProjectiles = bossProjectiles.filter(bp => { bp.draw(); return bp.update(); });
     drawBow();
-    arrows.forEach(a => { 
-        a.draw(); 
-        a.update(); 
+    arrows = arrows.filter(a => {
+        a.draw();
+        a.update();
         
-        // PvP Collision Check
-        if (isCoop && remotePlayer.active) {
+        // PvP Collision Check (Only my projectiles can hit the remote player)
+        if (isPvP && remotePlayer.active && !a.isStuck && !a.isRemote) {
             const dx = a.x - remotePlayer.x;
             const dy = a.y - remotePlayer.y;
-            if (Math.sqrt(dx * dx + dy * dy) < 25) {
+            if (Math.sqrt(dx * dx + dy * dy) < 30) {
                 const damage = (5 + (a.tier * 2)) * (1 + (a.stars * 0.5));
                 sendData({ type: 'pvp_hit', damage: damage, x: a.x, y: a.y });
-                a.life = 0; // Destroy arrow
+                return false; // Destroy arrow on hit
             }
         }
+        return !a.isStuck || (a.isStuck && Date.now() - (a.hitTime || 0) < 1000);
     });
+    
     hammers = hammers.filter(h => { 
         const active = h.update(); 
         h.draw(); 
         
-        // PvP Collision Check for Hammers
-        if (isCoop && remotePlayer.active && h.state === 'flying') {
+        // PvP Collision Check for Hammers (Only my projectiles can hit the remote player)
+        if (isPvP && remotePlayer.active && h.state === 'flying' && !h.isRemote) {
             const dx = h.x - remotePlayer.x;
             const dy = h.y - remotePlayer.y;
-            if (Math.sqrt(dx * dx + dy * dy) < 30) {
+            if (Math.sqrt(dx * dx + dy * dy) < 40) {
                 const damage = (10 + (h.tier * 5)) * (1 + (h.stars * 1.0));
                 sendData({ type: 'pvp_hit', damage: damage, x: h.x, y: h.y });
                 h.state = 'returning';
@@ -1930,7 +2005,7 @@ function update() {
             Sounds.overload(); // 웅장한 충전 경보음
         }
 
-        if (!boss.isGroggy && Math.random() < 0.015) {
+        if (!boss.isGroggy && Math.random() < 0.015 * dt) {
             floorPatterns.push(new VoidPattern(currentX || 500, currentY || 300));
         }
         floorPatterns = floorPatterns.filter(p => {
@@ -1953,6 +2028,8 @@ function update() {
             void comboDisplay.offsetWidth; comboDisplay.classList.add('pop');
         }
     } else comboDisplay.classList.remove('pop');
+
+    // request permission for next frame
     requestAnimationFrame(update);
 }
 
@@ -1996,24 +2073,48 @@ bossModeBtn.addEventListener('click', () => {
 const pvpModeBtn = document.getElementById('pvp-mode-btn');
 pvpModeBtn.addEventListener('click', () => {
     if (boss.active) return;
-    isPvP = !isPvP;
     if (isPvP) {
-        startCountdown();
-        pvpModeBtn.textContent = 'LEAVE ARENA';
-        pvpModeBtn.classList.add('active');
-        playerHP = 100;
-        isDead = false;
-        updateHPBar();
-    } else {
+        isPvP = false;
         pvpModeBtn.textContent = 'DUEL ARENA';
         pvpModeBtn.classList.remove('active');
+    } else {
+        if (isCoop) {
+            sendData({ type: 'pvp_request' });
+            pvpModeBtn.textContent = 'REQUESTING...';
+        } else {
+            alert("Connect with a friend first!");
+        }
     }
+});
+
+const pvpAcceptBtn = document.getElementById('pvp-accept-btn');
+const pvpDeclineBtn = document.getElementById('pvp-decline-btn');
+
+pvpAcceptBtn.addEventListener('click', () => {
+    document.getElementById('pvp-request-panel').classList.add('hidden');
+    isPvP = true;
+    pvpModeBtn.textContent = 'LEAVE ARENA';
+    pvpModeBtn.classList.add('active');
+    sendData({ type: 'pvp_accept' });
+    startCountdown();
+    playerHP = 100;
+    isDead = false;
+    updateHPBar();
+});
+
+pvpDeclineBtn.addEventListener('click', () => {
+    document.getElementById('pvp-request-panel').classList.add('hidden');
+    sendData({ type: 'pvp_decline' });
 });
 
 function updateHPBar() {
     const hpPercent = Math.max(0, (playerHP / maxPlayerHP) * 100);
     document.getElementById('player-hp-fill').style.width = hpPercent + '%';
     document.getElementById('player-hp-percent').innerText = Math.ceil(hpPercent) + '%';
+    
+    if (isCoop) {
+        sendData({ type: 'player_hp', hp: playerHP });
+    }
     
     if (playerHP <= 0 && !isDead) {
         isDead = true;
@@ -2070,9 +2171,11 @@ swingBtn.addEventListener('click', () => {
 });
 
 // Initial cursor state fix
-document.addEventListener('DOMContentLoaded', () => {
-    cursorDot.style.opacity = '1';
-    cursorOutline.style.opacity = '1';
-});
+cursorDot.style.opacity = '1';
+cursorOutline.style.opacity = '1';
+cursorDot.style.left = '50%';
+cursorDot.style.top = '50%';
+cursorOutline.style.left = '50%';
+cursorOutline.style.top = '50%';
 
-update();
+requestAnimationFrame(update);

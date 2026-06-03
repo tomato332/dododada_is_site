@@ -10,7 +10,10 @@
 <body>
     <div id="game-container">
         <div id="multiplayer-ui">
-            <div id="peer-id-display">Connecting to network...</div>
+            <div id="id-container">
+                <div id="peer-id-display">Connecting to network...</div>
+                <button id="copy-id-btn" class="mini-btn">COPY</button>
+            </div>
             <input type="text" id="remote-id-input" placeholder="Enter Friend's ID">
             <button id="connect-btn">CONNECT FOR PVP/PVE</button>
             <div id="connection-status"></div>
@@ -38,18 +41,18 @@
                 <span id="stat-pity" class="value">+0%</span>
             </div>
         </div>
+        <div id="player-hp-container">
+            <div class="hp-label">ARCHER STABILITY <span id="player-hp-percent">100%</span></div>
+            <div class="hp-bar-bg">
+                <div id="player-hp-fill"></div>
+            </div>
+        </div>
         <canvas id="gameCanvas"></canvas>
         <div id="ui-layer">
             <div id="boss-hp-container" class="hidden">
                 <div class="boss-name">PRIMORDIAL VOID</div>
                 <div class="hp-bar-bg">
                     <div id="boss-hp-fill"></div>
-                </div>
-            </div>
-            <div id="player-hp-container">
-                <div class="hp-label">ARCHER STABILITY <span id="player-hp-percent">100%</span></div>
-                <div class="hp-bar-bg">
-                    <div id="player-hp-fill"></div>
                 </div>
             </div>
             <div id="score-board">SCORE <span id="score">0</span></div>
@@ -65,6 +68,14 @@
             <div id="message">DRAG TO CHARGE ENERGY</div>
         </div>
         <div id="intro-countdown" class="hidden"></div>
+        <div id="pvp-request-panel" class="hidden">
+            <div class="panel-header">DUEL REQUEST</div>
+            <div id="pvp-request-msg">A Challenger approaches!</div>
+            <div class="request-buttons">
+                <button id="pvp-accept-btn">ACCEPT</button>
+                <button id="pvp-decline-btn">DECLINE</button>
+            </div>
+        </div>
     </div>
     <div class="cursor-dot"></div>
     <div class="cursor-outline"></div>
