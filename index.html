@@ -3,60 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>랜덤 배경색 바꾸기</title>
-    <style>
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            font-family: 'Arial', sans-serif;
-            background-color: #f0f2f5;
-            transition: background-color 0.3s ease;
-        }
-        .container {
-            text-align: center;
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
-        button {
-            padding: 12px 24px;
-            font-size: 16px;
-            font-weight: bold;
-            color: white;
-            background-color: #007bff;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: transform 0.1s ease;
-        }
-        button:active {
-            transform: scale(0.95);
-        }
-    </style>
+    <title>궁수 마스터: 과녁 맞추기</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-    <div class="container">
-        <h1>🎨 기분 전환 페이지</h1>
-        <p>아래 버튼을 눌러 배경색을 바꿔보세요!</p>
-        <button onclick="changeBackgroundColor()">색상 변경하기</button>
+    <div id="game-container">
+        <div id="combo-display"></div>
+        <div id="analysis-panel">
+            <div class="panel-header">EVOLUTION ANALYSIS</div>
+            <div class="stat-row">
+                <span class="label">CURRENT TIER</span>
+                <span id="stat-tier" class="value">-</span>
+            </div>
+            <div class="stat-row">
+                <span class="label">PROBABILITY</span>
+                <span id="stat-prob" class="value">0%</span>
+            </div>
+            <div class="progress-container">
+                <div id="stat-bar" class="progress-bar"></div>
+            </div>
+            <div class="stat-row">
+                <span class="label">PREDICTION (2S)</span>
+                <span id="stat-predict" class="value">-</span>
+            </div>
+            <div class="stat-row">
+                <span class="label">PITY BONUS</span>
+                <span id="stat-pity" class="value">+0%</span>
+            </div>
+        </div>
+        <canvas id="gameCanvas"></canvas>
+        <div id="ui-layer">
+            <div id="boss-hp-container" class="hidden">
+                <div class="boss-name">PRIMORDIAL VOID</div>
+                <div class="hp-bar-bg">
+                    <div id="boss-hp-fill"></div>
+                </div>
+            </div>
+            <div id="player-hp-container">
+                <div class="hp-label">ARCHER STABILITY</div>
+                <div class="hp-bar-bg">
+                    <div id="player-hp-fill"></div>
+                </div>
+            </div>
+            <div id="score-board">SCORE <span id="score">0</span></div>
+            <div id="weapon-selector">
+                <button id="weapon-bow-btn" class="active">BOW</button>
+                <button id="weapon-hammer-btn">THROW</button>
+                <button id="weapon-swing-btn">SWING</button>
+            </div>
+            <button id="boss-mode-btn">ENTER BOSS RIFT</button>
+            <div id="message">DRAG TO CHARGE ENERGY</div>
+        </div>
     </div>
-
-    <script>
-        function changeBackgroundColor() {
-            // 무작위 RGB 색상 생성
-            const r = Math.floor(Math.random() * 256);
-            const g = Math.floor(Math.random() * 256);
-            const b = Math.floor(Math.random() * 256);
-            
-            // body의 배경색으로 적용
-            document.body.style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
-        }
-    </script>
-
+    <div class="cursor-dot"></div>
+    <div class="cursor-outline"></div>
+    <script type="module" src="game.js"></script>
 </body>
 </html>
