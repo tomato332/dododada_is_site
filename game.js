@@ -17,15 +17,42 @@ const bossModeBtn = document.getElementById('boss-mode-btn');
 const bossHpContainer = document.getElementById('boss-hp-container');
 const bossHpFill = document.getElementById('boss-hp-fill');
 
-canvas.width = 1000;
-canvas.height = 600;
+canvas.width = 1200;
+canvas.height = 800;
 
 let score = 0;
 let isDragging = false;
 let startX, startY, currentX, currentY;
 let arrows = [];
-let target = { x: 800, y: 300, radius: 30, speed: 1.5, direction: 1 };
-let boss = { active: false, hp: 500000000, maxHp: 500000000, x: 800, y: 300, radius: 80, phase: 1, lastTeleport: 0, teleportCount: 0, isGroggy: false, groggyEndTime: 0, isCharging: false, chargeStartTime: 0, lastChargeAttackTime: 0, targetX: 0, targetY: 0, starLevel: 0, lastStarUpdateTime: 0 };
+let target = { x: 900, y: 400, radius: 30, speed: 1.5, direction: 1 };
+let boss = { 
+    active: false, 
+    hp: 500000000, 
+    maxHp: 500000000, 
+    x: 900, 
+    y: 400, 
+    radius: 80, 
+    phase: 1, 
+    lastTeleport: 0, 
+    teleportCount: 0, 
+    isGroggy: false, 
+    groggyEndTime: 0, 
+    isCharging: false, 
+    chargeStartTime: 0, 
+    lastChargeAttackTime: 0, 
+    targetX: 0, 
+    targetY: 0, 
+    starLevel: 0, 
+    lastStarUpdateTime: 0,
+    // New Patterns
+    gravityEnabled: false,
+    gravityStrength: 0.15,
+    rifts: [], // Dimensional Rifts
+    guardians: [], // Orbiting Guardians
+    isBursting: false, // Singularity Burst
+    timeScale: 1.0,
+    lastPatternTime: 0
+};
 let playerHP = 100, maxPlayerHP = 100;
 let floorPatterns = [];
 let particles = [];
@@ -328,8 +355,9 @@ class BossProjectile {
         this.life = 1.0;
     }
     update() {
-        this.x += this.vx;
-        this.y += this.vy;
+        const dt = boss.active ? boss.timeScale : 1.0;
+        this.x += this.vx * dt;
+        this.y += this.vy * dt;
         
         if (this.x < -50 || this.x > canvas.width + 50 || this.y < -50 || this.y > canvas.height + 50) {
             return false;
@@ -411,20 +439,21 @@ class Arrow {
         if (this.isStuck) return;
         
         const oldX = this.x, oldY = this.y;
+        const dt = boss.active ? boss.timeScale : 1.0;
         
-        // Boss Gravity Pattern (Disabled during Groggy)
-        if (boss.active && !boss.isGroggy) {
+        // Boss Gravity Pattern
+        if (boss.active && boss.gravityEnabled && !boss.isGroggy) {
             const bdx = boss.x - this.x, bdy = boss.y - this.y;
             const bdist = Math.sqrt(bdx * bdx + bdy * bdy);
-            if (bdist < 400) {
-                const force = (1 - bdist / 400) * 0.2;
-                this.vx += bdx * force * 0.05;
-                this.vy += bdy * force * 0.05;
+            if (bdist < 300) {
+                const force = (1 - bdist / 300) * boss.gravityStrength;
+                this.vx += bdx * force;
+                this.vy += bdy * force;
             }
         }
 
-        this.x += this.vx; this.y += this.vy;
-        this.vy += GRAVITY * (1 - (this.tier / 12));
+        this.x += this.vx * dt; this.y += this.vy * dt;
+        this.vy += GRAVITY * dt * (1 - (this.tier / 12));
 
         if (this.tier > 5 && Math.random() > 0.5) ripples.push(new Ripple(this.x, this.y, this.tier / 2));
         
@@ -524,7 +553,8 @@ class HammerProjectile {
         this.flyDist = 0;
     }
     update() {
-        this.angle += this.rotSpeed;
+        const dt = boss.active ? boss.timeScale : 1.0;
+        this.angle += this.rotSpeed * dt;
         const activeColor = this.stars === 10 ? `hsl(${Date.now() % 360}, 100%, 70%)` : (this.stars > 0 ? TIER_CONFIG.COLORS[Math.min(this.stars, TIER_CONFIG.MAX_LEVEL)] : '#00ffd2');
         
         if (Math.random() < 0.5) {
@@ -540,10 +570,22 @@ class HammerProjectile {
 
         if (this.state === 'flying') {
             const oldX = this.x, oldY = this.y;
-            this.x += this.vx;
-            this.y += this.vy;
-            this.vy += GRAVITY * 0.3; // 중력을 무겁게 적용
-            this.flyDist += Math.sqrt(this.vx * this.vx + this.vy * this.vy);
+            
+            // Boss Gravity Pattern
+            if (boss.active && boss.gravityEnabled && !boss.isGroggy) {
+                const bdx = boss.x - this.x, bdy = boss.y - this.y;
+                const bdist = Math.sqrt(bdx * bdx + bdy * bdy);
+                if (bdist < 300) {
+                    const force = (1 - bdist / 300) * boss.gravityStrength;
+                    this.vx += bdx * force;
+                    this.vy += bdy * force;
+                }
+            }
+            
+            this.x += this.vx * dt;
+            this.y += this.vy * dt;
+            this.vy += GRAVITY * 0.3 * dt; // 중력을 무겁게 적용
+            this.flyDist += Math.sqrt(this.vx * this.vx + this.vy * this.vy) * dt;
 
             if (this.y > canvas.height + 50 || this.flyDist > this.maxDist) {
                 this.state = 'returning';
@@ -899,33 +941,115 @@ function drawTrajectory() {
 
 function drawTarget() {
     if (boss.active) {
+        // --- 5. TIME WARP LOGIC ---
+        // 보스 HP가 낮을수록 가끔 시간을 느리게 만듦
+        if (!boss.isGroggy && Math.random() < 0.005 && Date.now() - boss.lastPatternTime > 5000) {
+            boss.timeScale = 0.3;
+            boss.lastPatternTime = Date.now();
+            floatingTexts.push(new FloatingText(canvas.width/2, canvas.height/2, 'TIME WARP', '#ff00ff', 30));
+        }
+        if (boss.timeScale < 1.0 && Date.now() - boss.lastPatternTime > 2000) {
+            boss.timeScale = Math.min(1.0, boss.timeScale + 0.01);
+        }
+
         // Check Groggy Expiry
         if (boss.isGroggy && Date.now() > boss.groggyEndTime) {
             boss.isGroggy = false;
             boss.lastTeleport = Date.now();
+            
+            // --- 4. SINGULARITY ERUPTION (On Groggy Recovery) ---
+            boss.isBursting = true;
+            for (let i = 0; i < 36; i++) {
+                const angle = (i * 10) * Math.PI / 180;
+                const bx = boss.x + Math.cos(angle) * 20;
+                const by = boss.y + Math.sin(angle) * 20;
+                const p = new BossProjectile(bx, by, bx + Math.cos(angle)*100, by + Math.sin(angle)*100, 15);
+                p.speed = 5; p.vx = Math.cos(angle) * p.speed; p.vy = Math.sin(angle) * p.speed;
+                bossProjectiles.push(p);
+            }
+            floatingTexts.push(new FloatingText(boss.x, boss.y, 'SINGULARITY ERUPTION', '#ff003c', 20));
         }
 
-        // Pattern: Floating & Teleport (Disabled during Groggy / Charging)
-        if (!boss.isGroggy && !boss.isCharging && Date.now() - boss.lastTeleport > 4000) {
+        // Pattern: Floating & Teleport
+        if (!boss.isGroggy && !boss.isCharging && Date.now() - boss.lastTeleport > 4000 * boss.timeScale) {
+            // --- 2. DIMENSIONAL RIFT (Leave rift on teleport) ---
+            if (boss.active) {
+                boss.rifts.push({ x: boss.x, y: boss.y, life: 1.0, lastShoot: Date.now() });
+            }
+
             boss.teleportCount++;
             if (boss.teleportCount >= 4) {
                 boss.isGroggy = true;
-                boss.groggyEndTime = Date.now() + 6000; // 6 seconds groggy
+                boss.groggyEndTime = Date.now() + 6000;
                 boss.teleportCount = 0;
                 Sounds.overload();
                 impactFlash = 0.5;
             } else {
-                boss.x = 600 + Math.random() * 300;
-                boss.y = 100 + Math.random() * 400;
+                boss.x = 200 + Math.random() * (canvas.width - 400);
+                boss.y = 100 + Math.random() * (canvas.height - 200);
                 boss.lastTeleport = Date.now();
                 impactFlash = 0.3;
             }
         }
 
+        // Rift Update & Draw
+        boss.rifts = boss.rifts.filter(rift => {
+            rift.life -= 0.005;
+            ctx.save();
+            ctx.globalAlpha = rift.life;
+            ctx.shadowBlur = 15; ctx.shadowColor = '#7000ff';
+            ctx.strokeStyle = '#7000ff'; ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(rift.x - 20, rift.y - 20); ctx.lineTo(rift.x + 20, rift.y + 20);
+            ctx.moveTo(rift.x + 20, rift.y - 20); ctx.lineTo(rift.x - 20, rift.y + 20);
+            ctx.stroke();
+            ctx.restore();
+
+            if (Date.now() - rift.lastShoot > 2000) {
+                bossProjectiles.push(new BossProjectile(rift.x, rift.y, canvas.width/2, canvas.height/2, 5));
+                rift.lastShoot = Date.now();
+            }
+            return rift.life > 0;
+        });
+
+        // --- 3. EVENT HORIZON (Guardians) ---
+        if (!boss.isGroggy && boss.guardians.length < 3 && Math.random() < 0.01) {
+            boss.guardians.push({ angle: Math.random() * Math.PI * 2, distance: 150, radius: 25 });
+        }
+        boss.guardians.forEach((g, idx) => {
+            g.angle += 0.03 * boss.timeScale;
+            const gx = boss.x + Math.cos(g.angle) * g.distance;
+            const gy = boss.y + Math.sin(g.angle) * g.distance;
+            
+            ctx.save();
+            ctx.fillStyle = '#000'; ctx.strokeStyle = '#ff00ff'; ctx.lineWidth = 2;
+            ctx.shadowBlur = 15; ctx.shadowColor = '#ff00ff';
+            ctx.beginPath(); ctx.arc(gx, gy, g.radius, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+            ctx.restore();
+
+            // Collision with arrows
+            arrows.forEach(a => {
+                const dist = Math.sqrt((a.x - gx)**2 + (a.y - gy)**2);
+                if (dist < g.radius + 10) { a.life = 0; particles.push(new Particle(a.x, a.y, 0, 0, '#ff00ff')); }
+            });
+        });
+
+        // --- 1. GRAVITY WELL ---
+        if (!boss.isGroggy && boss.hp < boss.maxHp * 0.8) {
+            boss.gravityEnabled = true;
+            ctx.save();
+            ctx.beginPath();
+            ctx.setLineDash([5, 5]);
+            ctx.strokeStyle = 'rgba(255, 62, 0, 0.2)';
+            ctx.arc(boss.x, boss.y, 300, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.restore();
+        } else { boss.gravityEnabled = false; }
+
         if (boss.isCharging) {
-            boss.lastTeleport = Date.now(); // 차징 중에는 텔레포트 쿨타임 리셋
+            boss.lastTeleport = Date.now();
         } else {
-            boss.y += Math.sin(Date.now() / 1000) * (boss.isGroggy ? 0.3 : (boss.hp < boss.maxHp * 0.7 ? 2 : 1));
+            boss.y += Math.sin(Date.now() / 1000) * (boss.isGroggy ? 0.3 : (boss.hp < boss.maxHp * 0.7 ? 2 : 1)) * boss.timeScale;
         }
         
         ctx.save(); ctx.translate(boss.x, boss.y);

@@ -40,8 +40,8 @@ body::before {
 
 #game-container {
     position: relative;
-    width: 1000px;
-    height: 600px;
+    width: 1200px;
+    height: 800px;
     background: var(--panel-bg);
     border: 1px solid rgba(255, 255, 255, 0.05);
     box-shadow: 0 50px 100px rgba(0, 0, 0, 0.9);
