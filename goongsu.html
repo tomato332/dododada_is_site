@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>궁수 마스터: 과녁 맞추기</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+</head>
+<body>
+    <div id="game-container">
+        <div id="multiplayer-ui">
+            <div id="id-container">
+                <div id="peer-id-display">Connecting to network...</div>
+                <button id="copy-id-btn" class="mini-btn">COPY</button>
+            </div>
+            <input type="text" id="remote-id-input" placeholder="Enter Friend's ID">
+            <button id="connect-btn">CONNECT FOR PVP/PVE</button>
+            <div id="connection-status"></div>
+        </div>
+        <div id="combo-display"></div>
+        <div id="analysis-panel">
+            <div class="panel-header">EVOLUTION ANALYSIS</div>
+            <div class="stat-row">
+                <span class="label">CURRENT TIER</span>
+                <span id="stat-tier" class="value">-</span>
+            </div>
+            <div class="stat-row">
+                <span class="label">PROBABILITY</span>
+                <span id="stat-prob" class="value">0%</span>
+            </div>
+            <div class="progress-container">
+                <div id="stat-bar" class="progress-bar"></div>
+            </div>
+            <div class="stat-row">
+                <span class="label">PREDICTION (2S)</span>
+                <span id="stat-predict" class="value">-</span>
+            </div>
+            <div class="stat-row">
+                <span class="label">PITY BONUS</span>
+                <span id="stat-pity" class="value">+0%</span>
+            </div>
+        </div>
+        <div id="player-hp-container">
+            <div class="hp-label">ARCHER STABILITY <span id="player-hp-percent">100%</span></div>
+            <div class="hp-bar-bg">
+                <div id="player-hp-fill"></div>
+            </div>
+        </div>
+        <canvas id="gameCanvas"></canvas>
+        <div id="ui-layer">
+            <div id="boss-hp-container" class="hidden">
+                <div class="boss-name">PRIMORDIAL VOID</div>
+                <div class="hp-bar-bg">
+                    <div id="boss-hp-fill"></div>
+                </div>
+            </div>
+            <div id="score-board">SCORE <span id="score">0</span></div>
+            <div id="weapon-selector">
+                <button id="weapon-bow-btn" class="active">BOW</button>
+                <button id="weapon-hammer-btn">THROW</button>
+                <button id="weapon-swing-btn">SWING</button>
+            </div>
+            <div id="mode-selector" style="margin-top: 15px; display: flex; gap: 10px; pointer-events: auto;">
+                <button id="boss-mode-btn">ENTER BOSS RIFT</button>
+                <button id="pvp-mode-btn">DUEL ARENA</button>
+            </div>
+            <div id="message">DRAG TO CHARGE ENERGY</div>
+        </div>
+        <div id="intro-countdown" class="hidden"></div>
+        <div id="pvp-request-panel" class="hidden">
+            <div class="panel-header">DUEL REQUEST</div>
+            <div id="pvp-request-msg">A Challenger approaches!</div>
+            <div class="request-buttons">
+                <button id="pvp-accept-btn">ACCEPT</button>
+                <button id="pvp-decline-btn">DECLINE</button>
+            </div>
+        </div>
+    </div>
+    <div class="cursor-dot"></div>
+    <div class="cursor-outline"></div>
+    <script type="module" src="game.js"></script>
+</body>
+</html>
