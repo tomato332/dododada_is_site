@@ -4,109 +4,245 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>tomato332</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/theme/darcula.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        :root { --bg: #fafafa; --text: #1a1a1a; --muted: #888; --border: #e0e0e0; --accent: #d4d4d4; }
-        .dark { --bg: #0d1117; --text: #c9d1d9; --muted: #555; --border: #30363d; --accent: #3a3a3a; }
+        :root { --bg: #fafafa; --text: #1a1a1a; --muted: #888; --border: #e0e0e0; --card-bg: #fff; }
+        .dark { --bg: #0d1117; --text: #c9d1d9; --muted: #555; --border: #30363d; --card-bg: #161b22; }
         body {
             background: var(--bg);
             color: var(--text);
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 40px 20px;
-            gap: 40px;
             transition: background .3s, color .3s;
-            position: relative;
-            overflow-x: hidden;
         }
-        body::before {
-            content: '';
-            position: fixed;
-            inset: 0;
-            background:
-                radial-gradient(ellipse 600px 400px at 20% 50%, var(--accent) 0%, transparent 70%),
-                radial-gradient(ellipse 500px 400px at 80% 20%, var(--accent) 0%, transparent 70%);
-            opacity: .4;
-            pointer-events: none;
-            transition: opacity .3s;
+        /* ── Hero: 첫 화면 정중앙 ── */
+        .hero {
+            min-height: 100vh;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            gap: 20px; padding: 40px 20px;
+            transition: min-height .5s ease;
         }
-        .profile { display: flex; flex-direction: column; align-items: center; gap: 12px; position: relative; }
-        .avatar {
-            width: 88px; height: 88px; border-radius: 50%;
+        .hero .avatar {
+            width: 96px; height: 96px; border-radius: 50%;
             border: 2px solid var(--border);
-            transition: border-color .3s, transform .4s ease;
-            position: relative;
+            transition: border-color .3s;
         }
-        .avatar:hover { transform: scale(1.06); }
-        .name { font-size: 1.3rem; font-weight: 600; letter-spacing: -.02em; }
-        .name span { opacity: .5; font-weight: 300; }
-        .links { display: flex; gap: 24px; position: relative; }
-        .links a {
-            color: var(--muted);
-            text-decoration: none;
-            font-size: .9rem;
-            letter-spacing: .04em;
-            text-transform: uppercase;
+        .hero .name {
+            font-size: 1.5rem; font-weight: 600; letter-spacing: -.02em;
+        }
+        .hero-links {
+            display: flex; gap: 20px;
+        }
+        .hero-links a {
+            color: var(--muted); text-decoration: none;
+            font-size: 1rem; transition: color .2s;
+        }
+        .hero-links a:hover { color: var(--text); }
+        .hero .stats img { max-width: 380px; border-radius: 8px; }
+
+        /* ── Header ── */
+        .header {
+            position: sticky; top: 0; z-index: 10;
+            background: var(--bg);
+            border-bottom: 1px solid var(--border);
+            padding: 12px 20px;
+            display: flex; align-items: center; justify-content: center; gap: 12px;
+            transition: background .3s;
+        }
+        .header .avatar {
+            width: 28px; height: 28px; border-radius: 50%;
+            border: 2px solid var(--border);
+        }
+        .header .name { font-size: .9rem; font-weight: 600; }
+        .header-links { display: flex; gap: 12px; margin-left: 10px; }
+        .header-links a {
+            color: var(--muted); text-decoration: none;
+            font-size: .8rem; transition: color .2s;
+        }
+        .header-links a:hover { color: var(--text); }
+        .header-toggle {
+            background: none; border: 1px solid var(--border); border-radius: 6px;
+            color: var(--muted); cursor: pointer;
+            padding: 4px 12px; font-size: .75rem; margin-left: 8px;
+            transition: color .2s, border-color .2s;
+        }
+        .header-toggle:hover { color: var(--text); border-color: var(--text); }
+
+        .theme-btn {
+            position: fixed; top: 18px; right: 22px; z-index: 20;
+            background: none; border: none; cursor: pointer;
+            font-size: 1.2rem; line-height: 1; color: var(--muted);
             transition: color .2s;
-            position: relative;
-            padding: 4px 0;
         }
-        .links a::after {
-            content: '';
-            position: absolute; bottom: 0; left: 0;
-            width: 0; height: 1.5px;
-            background: currentColor;
-            transition: width .25s ease;
-        }
-        .links a:hover { color: var(--text); }
-        .links a:hover::after { width: 100%; }
-        .stats {
-            position: relative;
-            opacity: .7;
+        .theme-btn:hover { color: var(--text); }
+
+        /* ── 커서 무지개 글로우 ── */
+        #cursor-glow {
+            position: fixed; pointer-events: none; z-index: 999;
+            width: 240px; height: 240px;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            opacity: 0.5;
             transition: opacity .3s;
         }
-        .stats:hover { opacity: 1; }
-        .stats img { max-width: 380px; border-radius: 8px; display: block; }
-        .theme-btn {
-            position: fixed; top: 24px; right: 28px;
-            background: none; border: none; cursor: pointer;
-            font-size: 1.2rem; line-height: 1;
-            color: var(--muted);
-            transition: color .2s, transform .3s;
-            z-index: 10;
+
+        /* ── Content ── */
+        .content {
+            max-width: 720px; margin: 0 auto; padding: 40px 20px 80px;
         }
-        .theme-btn:hover { color: var(--text); transform: rotate(12deg); }
-        .footer {
-            position: fixed; bottom: 24px;
-            font-size: .75rem; color: var(--muted);
-            opacity: .4;
-            letter-spacing: .03em;
+        .section-title {
+            font-size: 1rem; font-weight: 600; margin-bottom: 16px;
+            color: var(--muted); letter-spacing: -.01em;
+        }
+        .repo {
+            background: var(--card-bg);
+            border: 1px solid var(--border); border-radius: 8px;
+            padding: 16px 20px; margin-bottom: 12px;
+            transition: background .3s, border-color .3s;
+        }
+        .repo-top { display: flex; align-items: center; gap: 8px; }
+        .repo-name {
+            font-weight: 600; font-size: .95rem;
+            color: var(--text); text-decoration: none;
+        }
+        .repo-name:hover { text-decoration: underline; }
+        .repo-desc {
+            font-size: .85rem; color: var(--muted);
+            margin-top: 4px; line-height: 1.5;
+        }
+        .repo-meta {
+            display: flex; gap: 12px; margin-top: 8px;
+            font-size: .8rem; color: var(--muted);
+        }
+        .repo-lang { display: flex; align-items: center; gap: 4px; }
+        .lang-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+        .repo-readme {
+            font-size: .85rem; color: var(--muted);
+            margin-top: 10px; padding-top: 10px;
+            border-top: 1px solid var(--border);
+            line-height: 1.6; white-space: pre-wrap;
+            max-height: 200px; overflow-y: auto;
+        }
+        .readme-toggle {
+            background: none; border: none; cursor: pointer;
+            font-size: .8rem; color: var(--muted); margin-top: 6px;
+            transition: color .2s;
+        }
+        .readme-toggle:hover { color: var(--text); }
+        .code-toggle {
+            background: none; border: none; cursor: pointer;
+            font-size: .8rem; color: var(--muted); margin-top: 4px;
+            transition: color .2s;
+        }
+        .code-toggle:hover { color: var(--text); }
+        .repo-files {
+            font-size: .8rem; color: var(--muted);
+            margin-top: 8px; padding-top: 8px;
+            border-top: 1px solid var(--border);
+            max-height: 300px; overflow-y: auto;
+        }
+        .repo-files a {
+            display: block; color: var(--muted); text-decoration: none;
+            padding: 3px 0; transition: color .2s;
+        }
+        .repo-files a:hover { color: var(--text); }
+        .repo-files .folder { color: var(--muted); }
+        .repo-files .file { color: var(--muted); padding-left: 16px; }
+        .repo-code {
+            font-size: .8rem;
+            margin-top: 6px; padding: 0;
+            border-radius: 6px;
+            max-height: 350px; overflow: auto;
+            border: 1px solid var(--border);
+        }
+        .repo-code .CodeMirror {
+            height: auto;
+            font-size: .75rem;
+        }
+        .loading { text-align: center; color: var(--muted); padding: 30px; }
+
+        /* ── Floating repos panel ── */
+        #repos-overlay {
+            display: none;
+            position: fixed; inset: 0; z-index: 30;
+            background: rgba(0,0,0,.4);
+        }
+        #repos-overlay.show { display: block; }
+        #repos-panel {
+            position: fixed; top: 60px; left: 50%; transform: translateX(-50%);
+            z-index: 31;
+            width: min(640px, calc(100vw - 32px));
+            max-height: calc(100vh - 100px);
+            overflow-y: auto;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 8px 40px rgba(0,0,0,.3);
+            display: none;
+            transition: background .3s;
+        }
+        #repos-panel.show { display: block; }
+        #repos-panel .close-btn {
+            float: right; background: none; border: none;
+            color: var(--muted); cursor: pointer;
+            font-size: 1.2rem; line-height: 1;
+        }
+        #repos-panel .close-btn:hover { color: var(--text); }
+        #repos-panel .section-title {
+            font-size: 1rem; font-weight: 600; margin-bottom: 16px;
+            color: var(--muted); letter-spacing: -.01em;
         }
     </style>
 </head>
 <body>
     <button class="theme-btn" onclick="toggleTheme()" aria-label="테마 전환">🌙</button>
+    <div id="cursor-glow"></div>
 
-    <div class="profile">
+    <!-- Header -->
+    <div class="header" id="header">
+        <img class="avatar" src="https://avatars.githubusercontent.com/tomato332" alt="" />
+        <span class="name">tomato332</span>
+        <div class="header-links">
+            <a href="https://github.com/tomato332" target="_blank">github</a>
+            <a href="goongsu.html" target="_blank">game</a>
+        </div>
+        <button class="header-toggle" id="toggleReposBtn">▾ repos</button>
+    </div>
+
+    <!-- Floating repos panel -->
+    <div id="repos-overlay"></div>
+    <div id="repos-panel">
+        <button class="close-btn" id="closeReposBtn">✕</button>
+        <div class="section-title">Repositories</div>
+        <div class="loading" id="loading">불러오는 중...</div>
+        <div id="content"></div>
+    </div>
+
+    <!-- Hero -->
+    <div class="hero" id="hero">
         <img class="avatar" src="https://avatars.githubusercontent.com/tomato332" alt="tomato332" />
         <div class="name">tomato332</div>
+        <div class="hero-links">
+            <a href="https://github.com/tomato332" target="_blank">github</a>
+            <a href="goongsu.html" target="_blank">game</a>
+        </div>
+        <div class="stats">
+            <img src="https://github-readme-stats.vercel.app/api?username=tomato332&show_icons=true&theme=dark&bg_color=0d1117&border_color=30363d&text_color=c9d1d9&icon_color=58a6ff" alt="GitHub Stats" />
+        </div>
     </div>
 
-    <div class="links">
-        <a href="https://github.com/tomato332" target="_blank">github</a>
-        <a href="goongsu.html" target="_blank">game</a>
-    </div>
-
-    <div class="stats">
-        <img src="https://github-readme-stats.vercel.app/api?username=tomato332&show_icons=true&theme=dark&bg_color=0d1117&border_color=30363d&text_color=c9d1d9&icon_color=58a6ff" alt="GitHub Stats" />
-    </div>
-
-    <div class="footer">tomato332</div>
-
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/mode/javascript/javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/mode/python/python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/mode/htmlmixed/htmlmixed.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/mode/css/css.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/mode/xml/xml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/mode/clike/clike.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/mode/shell/shell.min.js"></script>
     <script>
         const html = document.documentElement;
         const btn = document.querySelector('.theme-btn');
@@ -119,6 +255,336 @@
             btn.textContent = isDark ? '☀️' : '🌙';
             localStorage.setItem('theme', isDark ? 'dark' : 'light');
         }
+
+        // ── 배경과 어울리는 은은한 글로우 ──
+        const glow = document.getElementById('cursor-glow');
+        document.addEventListener('mousemove', e => {
+            glow.style.left = e.clientX + 'px';
+            glow.style.top = e.clientY + 'px';
+        });
+        function subtleGlow() {
+            const isDark = html.classList.contains('dark');
+            const base = isDark ? '255,255,255' : '100,100,140';
+            glow.style.background = `radial-gradient(circle, rgba(${base},0.06) 0%, rgba(${base},0.02) 50%, transparent 70%)`;
+            requestAnimationFrame(subtleGlow);
+        }
+        subtleGlow();
+
+        // ── 레포 토글 (플로팅) ──
+        const panel = document.getElementById('repos-panel');
+        const overlay = document.getElementById('repos-overlay');
+        function showRepos() {
+            panel.classList.add('show');
+            overlay.classList.add('show');
+        }
+        function hideRepos() {
+            panel.classList.remove('show');
+            overlay.classList.remove('show');
+        }
+        document.getElementById('toggleReposBtn').onclick = showRepos;
+        document.getElementById('closeReposBtn').onclick = hideRepos;
+        overlay.onclick = hideRepos;
+
+        // ── 레포 불러오기 ──
+        const langColors = {
+            JavaScript: '#f1e05a', TypeScript: '#3178c6', Python: '#3572A5',
+            HTML: '#e34c26', CSS: '#563d7c', Batchfile: '#C1F12E', null: '#888'
+        };
+
+        async function loadRepos() {
+            const el = document.getElementById('loading');
+
+            // 캐시 확인 (1시간)
+            const cached = localStorage.getItem('repos_cache');
+            const cachedTime = localStorage.getItem('repos_cache_time');
+            if (cached && cachedTime && Date.now() - Number(cachedTime) < 3600000) {
+                renderRepos(JSON.parse(cached));
+                return;
+            }
+
+            try {
+                const res = await fetch('https://api.github.com/users/tomato332/repos?sort=updated&per_page=20');
+                if (!res.ok) throw new Error('API error ' + res.status);
+                const repos = await res.json();
+                localStorage.setItem('repos_cache', JSON.stringify(repos));
+                localStorage.setItem('repos_cache_time', String(Date.now()));
+                renderRepos(repos);
+            } catch (e) {
+                // 캐시라도 있으면 보여줌
+                const backup = localStorage.getItem('repos_cache');
+                if (backup) { renderRepos(JSON.parse(backup)); return; }
+                el.innerHTML = '불러오기 실패 (새로고침 해보세요)';
+            }
+        }
+
+        function renderRepos(repos) {
+            document.getElementById('loading').style.display = 'none';
+            const container = document.getElementById('content');
+
+            for (const repo of repos) {
+
+                const div = document.createElement('div');
+                div.className = 'repo';
+
+                const top = document.createElement('div');
+                top.className = 'repo-top';
+                const name = document.createElement('a');
+                name.className = 'repo-name';
+                name.href = repo.html_url; name.target = '_blank';
+                name.textContent = repo.name;
+                top.appendChild(name);
+                div.appendChild(top);
+
+                if (repo.description) {
+                    const desc = document.createElement('div');
+                    desc.className = 'repo-desc';
+                    desc.textContent = repo.description;
+                    div.appendChild(desc);
+                }
+
+                const meta = document.createElement('div');
+                meta.className = 'repo-meta';
+                if (repo.language) {
+                    const lang = document.createElement('span');
+                    lang.className = 'repo-lang';
+                    const dot = document.createElement('span');
+                    dot.className = 'lang-dot';
+                    dot.style.background = langColors[repo.language] || '#888';
+                    lang.appendChild(dot);
+                    lang.append(' ' + repo.language);
+                    meta.appendChild(lang);
+                }
+                if (repo.stargazers_count > 0) {
+                    const star = document.createElement('span');
+                    star.textContent = `★ ${repo.stargazers_count}`;
+                    meta.appendChild(star);
+                }
+                if (repo.fork) {
+                    const fork = document.createElement('span');
+                    fork.textContent = 'forked';
+                    meta.appendChild(fork);
+                }
+                div.appendChild(meta);
+
+                // 코드 보기 버튼
+                const codeBtn = document.createElement('button');
+                codeBtn.className = 'code-toggle';
+                codeBtn.textContent = '📂 코드 보기';
+                const filesDiv = document.createElement('div');
+                filesDiv.className = 'repo-files';
+                filesDiv.id = `files-${repo.id}`;
+                filesDiv.style.display = 'none';
+                const codeDiv = document.createElement('div');
+                codeDiv.className = 'repo-code';
+                codeDiv.id = `code-${repo.id}`;
+                codeDiv.style.display = 'none';
+                let filesLoaded = false;
+                let navStack = []; // 폴더 내비게이션 스택
+                let currentItems = null;
+
+                async function loadDir(url, title) {
+                    filesDiv.innerHTML = '불러오는 중...';
+                    try {
+                        const dRes = await fetch(url);
+                        if (dRes.ok) {
+                            const items = await dRes.json();
+                            currentItems = items;
+                            filesDiv.innerHTML = '';
+                            if (navStack.length > 0) {
+                                const backBtn = document.createElement('a');
+                                backBtn.href = '#';
+                                backBtn.className = 'folder';
+                                backBtn.textContent = '⬆  ..';
+                                backBtn.onclick = (e) => { e.preventDefault(); goBack(); };
+                                filesDiv.appendChild(backBtn);
+                            }
+                            for (const item of items) {
+                                const a = document.createElement('a');
+                                a.href = '#';
+                                a.className = item.type === 'dir' ? 'folder' : 'file';
+                                a.textContent = (item.type === 'dir' ? '📁 ' : '📄 ') + item.name;
+                                if (item.type === 'file') {
+                                    a.onclick = (ev) => loadFile(ev, item, repo);
+                                } else {
+                                    a.onclick = (ev) => {
+                                        ev.preventDefault();
+                                        navStack.push({ url, title });
+                                        loadDir(item.url, item.name);
+                                    };
+                                }
+                                filesDiv.appendChild(a);
+                            }
+                        } else {
+                            filesDiv.innerHTML = '<span style="color:var(--muted)">⚠ API 제한으로 불러올 수 없습니다</span>';
+                        }
+                    } catch (_) {
+                        filesDiv.innerHTML = '<span style="color:var(--muted)">⚠ 불러오기 실패</span>';
+                    }
+                }
+
+                function goBack() {
+                    const prev = navStack.pop();
+                    if (prev) loadDir(prev.url, prev.title);
+                }
+
+                codeBtn.onclick = async () => {
+                    if (filesDiv.style.display === 'none') {
+                        filesDiv.style.display = 'block';
+                        codeBtn.textContent = '📁 코드 닫기';
+                        if (!filesLoaded) {
+                            filesLoaded = true;
+                            // API 대신 raw.githubusercontent.com 사용 + GitHub 링크
+                            filesDiv.innerHTML = `<a href="${repo.html_url}" target="_blank" style="color:var(--muted);display:block;padding:4px 0;">📂 GitHub 저장소 열기 →</a>`;
+                            // 수동으로 파일 URL 입력해서 보는 기능
+                            filesDiv.innerHTML += `<div style="margin-top:8px;display:flex;gap:6px">
+                                <input id="raw-input-${repo.id}" placeholder="파일경로 (ex: src/main.js)" style="flex:1;background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:4px 8px;color:var(--text);font-size:.8rem" />
+                                <button onclick="viewRawFile('${repo.full_name}', '${repo.default_branch}', ${repo.id})" style="background:var(--border);border:none;border-radius:4px;padding:4px 10px;color:var(--muted);cursor:pointer;font-size:.8rem">보기</button>
+                            </div>`;
+                        }
+                    } else {
+                        filesDiv.style.display = 'none';
+                        codeDiv.style.display = 'none';
+                        codeBtn.textContent = '📂 코드 보기';
+                    }
+                };
+                div.appendChild(codeBtn);
+                div.appendChild(filesDiv);
+                div.appendChild(codeDiv);
+
+                // README는 버튼 누를 때만 로드
+                const readmeCache = localStorage.getItem(`readme_${repo.id}`);
+                if (readmeCache) {
+                    addReadme(div, repo, readmeCache);
+                } else {
+                    // 버튼은 달아두고 내용은 없음
+                    addReadme(div, repo, '');
+                }
+
+                container.appendChild(div);
+            }
+        }
+
+        const extMap = {
+            js: 'javascript', ts: 'javascript', jsx: 'javascript', tsx: 'javascript',
+            py: 'python', rb: 'python',
+            html: 'htmlmixed', htm: 'htmlmixed',
+            css: 'css', scss: 'css', less: 'css',
+            xml: 'xml', svg: 'xml',
+            json: 'javascript',
+            md: 'markdown',
+            java: 'text/x-java', c: 'text/x-csrc', cpp: 'text/x-c++src', h: 'text/x-csrc',
+            go: 'go', rs: 'rust',
+            sh: 'shell', bash: 'shell', zsh: 'shell',
+            yml: 'yaml', yaml: 'yaml',
+            sql: 'sql',
+            php: 'php',
+            swift: 'swift', kt: 'kotlin',
+        };
+        let cmInstance = null;
+
+        // raw.githubusercontent.com으로 파일 내용 긁어오기 (API 제한 없음)
+        window.viewRawFile = async (fullName, branch, repoId) => {
+            const input = document.getElementById(`raw-input-${repoId}`);
+            const path = input.value.trim();
+            if (!path) return;
+            const codeDiv = document.getElementById(`code-${repoId}`);
+            codeDiv.style.display = 'block';
+            codeDiv.innerHTML = '불러오는 중...';
+            try {
+                const res = await fetch(`https://raw.githubusercontent.com/${fullName}/${branch}/${path}`);
+                if (res.ok) {
+                    const content = await res.text();
+                    const ext = path.split('.').pop();
+                    const mode = extMap[ext] || 'text/plain';
+                    codeDiv.innerHTML = '';
+                    CodeMirror(codeDiv, {
+                        value: content,
+                        mode: mode,
+                        theme: html.classList.contains('dark') ? 'darcula' : 'default',
+                        lineNumbers: false,
+                        readOnly: true,
+                        viewportMargin: Infinity,
+                    });
+                } else {
+                    codeDiv.innerHTML = '<span style="color:var(--muted)">파일을 찾을 수 없습니다. 경로를 확인해보세요.</span>';
+                }
+            } catch (_) {
+                codeDiv.innerHTML = '<span style="color:var(--muted)">불러오기 실패</span>';
+            }
+        };
+
+        async function loadFile(e, item, repo) {
+            e.preventDefault();
+            const codeDiv = document.getElementById(`code-${repo.id}`);
+            codeDiv.style.display = 'block';
+            codeDiv.innerHTML = '';
+            try {
+                const fRes = await fetch(item.url);
+                if (fRes.ok) {
+                    const fData = await fRes.json();
+                    const content = atob(fData.content.replace(/\n/g, ''));
+                    const ext = item.name.split('.').pop();
+                    const mode = extMap[ext] || 'text/plain';
+                    cmInstance = CodeMirror(codeDiv, {
+                        value: content,
+                        mode: mode,
+                        theme: html.classList.contains('dark') ? 'darcula' : 'default',
+                        lineNumbers: false,
+                        readOnly: true,
+                        viewportMargin: Infinity,
+                    });
+                } else {
+                    codeDiv.textContent = '파일을 불러올 수 없습니다 (크면 GitHub에서 확인)';
+                }
+            } catch (_) {
+                codeDiv.textContent = '불러오기 실패';
+            }
+        }
+
+        function addReadme(div, repo, txt) {
+            if (!txt || txt.trim().length === 0) return;
+            const re = document.createElement('div');
+            re.className = 'repo-readme';
+            re.id = `rm-${repo.id}`;
+            try { re.innerHTML = marked.parse(txt); } catch { re.textContent = txt; }
+            re.style.display = 'none';
+            const tg = document.createElement('button');
+            tg.className = 'readme-toggle';
+            tg.textContent = '📖 README 보기';
+            let readmeFetched = false;
+            tg.onclick = async () => {
+                if (!readmeFetched) {
+                    // 캐시 확인
+                    const cached = localStorage.getItem(`readme_${repo.id}`);
+                    if (cached) {
+                        try { re.innerHTML = marked.parse(cached); } catch { re.textContent = cached; }
+                        readmeFetched = true;
+                    } else {
+                        try {
+                            const rr = await fetch(`https://raw.githubusercontent.com/${repo.full_name}/${repo.default_branch}/README.md`);
+                            if (rr.ok) {
+                                const txt = await rr.text();
+                                localStorage.setItem(`readme_${repo.id}`, txt);
+                                try { re.innerHTML = marked.parse(txt); } catch { re.textContent = txt; }
+                                readmeFetched = true;
+                            }
+                        } catch (_) {}
+                    }
+                }
+                const h = re.style.display === 'none';
+                re.style.display = h ? 'block' : 'none';
+                tg.textContent = h ? '📕 접기' : '📖 README 보기';
+            };
+            div.appendChild(tg);
+            div.appendChild(re);
+        }
+        // 5초 후에도 캐시 없으면 조용히 넘어감
+        setTimeout(() => {
+            document.querySelectorAll('.loading').forEach(el => {
+                if (el.style.display !== 'none') el.style.display = 'none';
+            });
+        }, 8000);
+        loadRepos();
     </script>
 </body>
 </html>
