@@ -6,90 +6,119 @@
     <title>tomato332</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root { --bg: #fafafa; --text: #1a1a1a; --muted: #888; --border: #e0e0e0; --accent: #d4d4d4; }
+        .dark { --bg: #0d1117; --text: #c9d1d9; --muted: #555; --border: #30363d; --accent: #3a3a3a; }
         body {
-            background: #0d1117;
-            color: #c9d1d9;
+            background: var(--bg);
+            color: var(--text);
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 32px;
             padding: 40px 20px;
+            gap: 40px;
+            transition: background .3s, color .3s;
+            position: relative;
+            overflow-x: hidden;
         }
-        .profile {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 16px;
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 600px 400px at 20% 50%, var(--accent) 0%, transparent 70%),
+                radial-gradient(ellipse 500px 400px at 80% 20%, var(--accent) 0%, transparent 70%);
+            opacity: .4;
+            pointer-events: none;
+            transition: opacity .3s;
         }
+        .profile { display: flex; flex-direction: column; align-items: center; gap: 12px; position: relative; }
         .avatar {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            border: 3px solid #30363d;
+            width: 88px; height: 88px; border-radius: 50%;
+            border: 2px solid var(--border);
+            transition: border-color .3s, transform .4s ease;
+            position: relative;
         }
-        .name {
-            font-size: 1.8rem;
-            font-weight: 600;
-        }
-        .link {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: #58a6ff;
+        .avatar:hover { transform: scale(1.06); }
+        .name { font-size: 1.3rem; font-weight: 600; letter-spacing: -.02em; }
+        .name span { opacity: .5; font-weight: 300; }
+        .links { display: flex; gap: 24px; position: relative; }
+        .links a {
+            color: var(--muted);
             text-decoration: none;
-            font-size: 1.2rem;
-            padding: 14px 32px;
-            border: 1px solid #30363d;
-            border-radius: 12px;
-            transition: all 0.2s;
-        }
-        .link:hover {
-            background: #161b22;
-            border-color: #58a6ff;
-            transform: translateY(-2px);
-        }
-        .stats img {
-            max-width: 100%;
-        }
-        .projects {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 16px;
-        }
-        .section-title {
-            font-size: 1.1rem;
-            color: #8b949e;
-            letter-spacing: 1px;
+            font-size: .9rem;
+            letter-spacing: .04em;
             text-transform: uppercase;
+            transition: color .2s;
+            position: relative;
+            padding: 4px 0;
         }
-        svg { width: 28px; height: 28px; fill: #c9d1d9; }
+        .links a::after {
+            content: '';
+            position: absolute; bottom: 0; left: 0;
+            width: 0; height: 1.5px;
+            background: currentColor;
+            transition: width .25s ease;
+        }
+        .links a:hover { color: var(--text); }
+        .links a:hover::after { width: 100%; }
+        .stats {
+            position: relative;
+            opacity: .7;
+            transition: opacity .3s;
+        }
+        .stats:hover { opacity: 1; }
+        .stats img { max-width: 380px; border-radius: 8px; display: block; }
+        .theme-btn {
+            position: fixed; top: 24px; right: 28px;
+            background: none; border: none; cursor: pointer;
+            font-size: 1.2rem; line-height: 1;
+            color: var(--muted);
+            transition: color .2s, transform .3s;
+            z-index: 10;
+        }
+        .theme-btn:hover { color: var(--text); transform: rotate(12deg); }
+        .footer {
+            position: fixed; bottom: 24px;
+            font-size: .75rem; color: var(--muted);
+            opacity: .4;
+            letter-spacing: .03em;
+        }
     </style>
 </head>
 <body>
+    <button class="theme-btn" onclick="toggleTheme()" aria-label="테마 전환">🌙</button>
+
     <div class="profile">
         <img class="avatar" src="https://avatars.githubusercontent.com/tomato332" alt="tomato332" />
         <div class="name">tomato332</div>
     </div>
 
-    <a class="link" href="https://github.com/tomato332" target="_blank">
-        <svg viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
-        github.com/tomato332
-    </a>
+    <div class="links">
+        <a href="https://github.com/tomato332" target="_blank">github</a>
+        <a href="goongsu.html" target="_blank">game</a>
+    </div>
 
     <div class="stats">
         <img src="https://github-readme-stats.vercel.app/api?username=tomato332&show_icons=true&theme=dark&bg_color=0d1117&border_color=30363d&text_color=c9d1d9&icon_color=58a6ff" alt="GitHub Stats" />
     </div>
 
-    <div class="projects">
-        <div class="section-title">게임</div>
-        <a class="link" href="goongsu.html" target="_blank">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
-            궁수 마스터: 과녁 맞추기
-        </a>
-    </div>
+    <div class="footer">tomato332</div>
+
+    <script>
+        const html = document.documentElement;
+        const btn = document.querySelector('.theme-btn');
+        const saved = localStorage.getItem('theme');
+        if (saved === 'light') { html.classList.remove('dark'); btn.textContent = '🌙'; }
+        else { html.classList.add('dark'); btn.textContent = '☀️'; }
+        function toggleTheme() {
+            html.classList.toggle('dark');
+            const isDark = html.classList.contains('dark');
+            btn.textContent = isDark ? '☀️' : '🌙';
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        }
+    </script>
 </body>
 </html>

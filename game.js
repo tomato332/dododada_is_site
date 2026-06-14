@@ -1947,6 +1947,7 @@ function update(timestamp) {
     drawTarget();
     drawRemotePlayer();
     // (Existing filters remain the same as they call .update() which we'll fix in the classes)
+    if (particles.length > 500) particles.splice(0, particles.length - 500);
     particles = particles.filter(p => { p.draw(); return p.update(); });
     ripples = ripples.filter(r => { r.draw(); return r.update(); });
     bolts = bolts.filter(b => { b.draw(); return b.update(); });
