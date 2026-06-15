@@ -195,6 +195,36 @@
             font-size: 1rem; font-weight: 600; margin-bottom: 16px;
             color: var(--muted); letter-spacing: -.01em;
         }
+
+        /* ── 반응형 (모바일) ── */
+        @media (max-width: 600px) {
+            .hero .avatar { width: 72px; height: 72px; }
+            .hero .name { font-size: 1.2rem; }
+            .hero-links { gap: 14px; }
+            .hero-links a { font-size: .9rem; }
+            .hero .stats img { max-width: 100%; }
+            .header { padding: 10px 14px; gap: 8px; flex-wrap: wrap; }
+            .header .avatar { width: 24px; height: 24px; }
+            .header .name { font-size: .8rem; }
+            .header-links { gap: 8px; margin-left: 4px; }
+            .header-links a { font-size: .75rem; }
+            .header-toggle { font-size: .7rem; padding: 3px 8px; margin-left: 4px; }
+            .theme-btn { top: 12px; right: 14px; font-size: 1rem; }
+            #repos-panel {
+                top: 0; left: 0; transform: none;
+                width: 100%; height: 100%; max-height: 100%;
+                border-radius: 0; padding: 16px;
+            }
+            #repos-panel .close-btn { font-size: 1rem; }
+            .repo { padding: 12px 14px; }
+            .repo-name { font-size: .85rem; }
+            .repo-desc { font-size: .8rem; }
+            .repo-meta { font-size: .75rem; gap: 8px; flex-wrap: wrap; }
+            .repo-readme { font-size: .8rem; max-height: 160px; }
+            #cursor-glow { display: none; }
+            .stats img { max-width: 100%; }
+            .section-title { font-size: .9rem; }
+        }
     </style>
 </head>
 <body>
