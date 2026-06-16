@@ -1,0 +1,74 @@
+/* repos.css — 레포지토리 패널 + 카드 */
+#repos-overlay {
+    display: none; position: fixed; inset: 0; z-index: 30;
+    background: rgba(0,0,0,.6);
+}
+#repos-overlay.show { display: block; }
+#repos-panel {
+    position: fixed; top: 56px; left: 50%; transform: translateX(-50%);
+    z-index: 31;
+    width: min(680px, calc(100vw - 32px));
+    max-height: calc(100vh - 80px);
+    overflow-y: auto;
+    background: var(--bg2);
+    border: 2px solid var(--border);
+    padding: 24px;
+    display: none;
+    box-shadow: 6px 6px 0 var(--shadow);
+}
+#repos-panel.show { display: block; }
+#repos-panel::-webkit-scrollbar { width: 6px; }
+#repos-panel::-webkit-scrollbar-thumb { background: var(--border); }
+#repos-panel .close-btn {
+    float: right; background: none; border: 2px solid var(--muted);
+    color: var(--muted); cursor: pointer;
+    width: 28px; height: 28px;
+    font-size: .8rem; line-height: 1;
+    transition: all .15s;
+}
+#repos-panel .close-btn:hover { border-color: var(--danger); color: var(--danger); }
+#repos-panel .section-title {
+    font-family: 'Press Start 2P', monospace;
+    font-size: .55rem; margin-bottom: 20px;
+    color: var(--muted); letter-spacing: 1px;
+}
+
+/* ── Repo cards ── */
+.repo {
+    background: transparent;
+    border: 2px solid var(--border);
+    padding: 14px 18px;
+    margin-bottom: 10px;
+    transition: all .15s;
+}
+.repo:hover { border-color: var(--accent); transform: translate(-2px, -2px); box-shadow: 4px 4px 0 var(--shadow); }
+.repo-top { display: flex; align-items: center; gap: 6px; }
+.repo-name { font-family: 'Press Start 2P', monospace; font-size: .5rem; color: var(--accent2); font-weight: 400; }
+.repo-name:hover { color: var(--accent3); }
+.repo-desc { font-size: .75rem; color: var(--muted); margin-top: 6px; line-height: 1.5; }
+.repo-meta { display: flex; gap: 12px; margin-top: 8px; font-size: .65rem; color: var(--muted); }
+.repo-lang { display: flex; align-items: center; gap: 4px; }
+.lang-dot { width: 8px; height: 8px; border-radius: 0; display: inline-block; border: 1px solid var(--border); }
+.repo-readme {
+    font-size: .75rem; color: var(--muted);
+    margin-top: 10px; padding-top: 10px;
+    border-top: 2px solid var(--border);
+    line-height: 1.6; white-space: pre-wrap;
+    max-height: 200px; overflow-y: auto;
+}
+.repo-readme::-webkit-scrollbar { width: 4px; }
+.repo-readme::-webkit-scrollbar-thumb { background: var(--muted); }
+.readme-toggle, .code-toggle {
+    background: none; border: none; cursor: pointer;
+    font-size: .65rem; color: var(--muted); margin-top: 6px;
+    font-family: 'IBM Plex Mono', monospace;
+    transition: color .15s;
+}
+.readme-toggle:hover, .code-toggle:hover { color: var(--accent); }
+.repo-files { font-size: .65rem; color: var(--muted); margin-top: 8px; padding-top: 8px; border-top: 2px solid var(--border); max-height: 300px; overflow-y: auto; }
+.repo-files a { display: block; color: var(--muted); padding: 3px 0; }
+.repo-files a:hover { color: var(--accent3); }
+.repo-files .file { padding-left: 14px; }
+.repo-code { margin-top: 8px; border: 2px solid var(--border); max-height: 350px; overflow: auto; }
+.repo-code .CodeMirror { height: auto; font-size: .7rem; }
+.loading { text-align: center; color: var(--muted); padding: 30px; font-size: .75rem; }

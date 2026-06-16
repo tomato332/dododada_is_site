@@ -1,0 +1,11 @@
+/* main.css — CSS 진입점 */
+@import url('base.css');
+@import url('hero.css');
+@import url('header.css');
+@import url('theme.css');
+@import url('glow.css');
+@import url('repos.css');
+@import url('clicker.css');
+@import url('shop.css');
+@import url('decorations.css');
+@import url('responsive.css');

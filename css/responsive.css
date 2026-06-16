@@ -1,0 +1,20 @@
+/* responsive.css — 모바일 대응 */
+@media (max-width: 600px) {
+    .hero .avatar { width: 72px; height: 72px; }
+    .hero .name { font-size: .8rem; }
+    .hero-links a { font-size: .65rem; padding: 4px 12px; }
+    .hero .stats img { max-width: 100%; }
+    .header { padding: 6px 12px; }
+    .header .name { font-size: .45rem; }
+    .header-toggle { font-size: .5rem; padding: 3px 8px; }
+    .theme-btn { width: 32px; height: 32px; font-size: .8rem; top: 10px; right: 12px; }
+    #repos-panel { top: 0; left: 0; transform: none; width: 100%; height: 100%; max-height: 100%; border-radius: 0; padding: 16px; box-shadow: none; }
+    #clicker-panel { top: 0; left: 0; transform: none; width: 100%; height: 100%; max-height: 100%; border-radius: 0; padding: 16px; box-shadow: none; }
+    #shop-panel { top: 0; left: 0; transform: none; width: 100%; height: 100%; max-height: 100%; border-radius: 0; padding: 16px; box-shadow: none; }
+    #cursor-glow { display: none; }
+    .repo { padding: 10px 12px; }
+    .repo-name { font-size: .45rem; }
+    .section-title { font-size: .45rem; }
+    .shop-item { flex-wrap: wrap; }
+    .shop-item-btn { min-width: 100%; margin-top: 6px; }
+}

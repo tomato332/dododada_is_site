@@ -1,0 +1,108 @@
+/* clicker.css — 🍅 클릭커 */
+#clicker-overlay {
+    display: none; position: fixed; inset: 0; z-index: 30;
+    background: rgba(0,0,0,.6);
+}
+#clicker-overlay.show { display: block; }
+#clicker-panel {
+    position: fixed; top: 56px; left: 50%; transform: translateX(-50%);
+    z-index: 31;
+    width: min(420px, calc(100vw - 32px));
+    max-height: calc(100vh - 80px);
+    overflow-y: auto;
+    background: var(--bg2);
+    border: 2px solid var(--border);
+    padding: 24px;
+    display: none;
+    box-shadow: 6px 6px 0 var(--shadow);
+    text-align: center;
+}
+#clicker-panel.show { display: block; }
+#clicker-panel::-webkit-scrollbar { width: 6px; }
+#clicker-panel::-webkit-scrollbar-thumb { background: var(--border); }
+#clicker-panel .close-btn {
+    float: right; background: none; border: 2px solid var(--muted);
+    color: var(--muted); cursor: pointer;
+    width: 28px; height: 28px;
+    font-size: .8rem; line-height: 1;
+    transition: all .15s;
+}
+#clicker-panel .close-btn:hover { border-color: var(--danger); color: var(--danger); }
+#clicker-panel .section-title {
+    font-family: 'Press Start 2P', monospace;
+    font-size: .55rem; margin-bottom: 16px;
+    color: var(--muted); letter-spacing: 1px;
+}
+.clicker-score {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 1.4rem; color: var(--accent2);
+    margin: 8px 0 4px;
+}
+.clicker-label {
+    font-size: .65rem; color: var(--muted);
+    font-family: 'Press Start 2P', monospace;
+}
+.clicker-tomato {
+    font-size: 96px; cursor: pointer; display: inline-block;
+    margin: 16px 0;
+    user-select: none;
+    transition: transform .08s ease;
+    line-height: 1;
+    position: relative;
+    filter: drop-shadow(0 4px 8px rgba(231,76,60,.3));
+}
+.clicker-tomato:active { transform: scale(.85); }
+.clicker-tomato.bounce {
+    animation: tomatoBounce .12s ease;
+}
+@keyframes tomatoBounce {
+    0% { transform: scale(1); }
+    40% { transform: scale(.88); }
+    70% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+.clicker-stat-row {
+    display: flex; justify-content: space-between;
+    padding: 8px 0; font-size: .75rem;
+    border-bottom: 1px solid var(--border);
+}
+.clicker-stat-row:last-child { border-bottom: none; }
+.clicker-stat-row .label { color: var(--muted); }
+.clicker-stat-row .value { color: var(--accent); font-weight: 600; }
+.clicker-btn {
+    background: none; border: 2px solid var(--border);
+    color: var(--text); cursor: pointer;
+    padding: 8px 18px; font-size: .65rem;
+    font-family: 'Press Start 2P', monospace;
+    transition: all .15s;
+    margin-top: 10px;
+    width: 100%;
+}
+.clicker-btn:hover {
+    border-color: var(--accent2); color: var(--accent2);
+    transform: translate(-2px, -2px);
+    box-shadow: 3px 3px 0 var(--accent);
+}
+.clicker-btn:disabled {
+    opacity: .4; cursor: not-allowed;
+    transform: none !important; box-shadow: none !important;
+}
+.clicker-particle {
+    position: fixed; pointer-events: none; z-index: 32;
+    font-size: 14px;
+    animation: particleUp .6s ease-out forwards;
+}
+@keyframes particleUp {
+    0% { opacity: 1; transform: translateY(0) scale(1); }
+    100% { opacity: 0; transform: translateY(-80px) scale(.3); }
+}
+.clicker-float-text {
+    position: fixed; pointer-events: none; z-index: 32;
+    font-family: 'Press Start 2P', monospace;
+    font-size: .75rem; color: var(--accent2);
+    animation: floatUp .7s ease-out forwards;
+}
+@keyframes floatUp {
+    0% { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(-60px); }
+}

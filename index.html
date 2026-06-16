@@ -8,216 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/theme/darcula.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        :root {
-            --bg: #1a1b2e;
-            --bg2: #1a1b2e;
-            --text: #c0caf5;
-            --muted: #565f89;
-            --border: #565f89;
-            --accent: #7aa2f7;
-            --accent2: #e0af68;
-            --accent3: #bb9af7;
-            --danger: #f7768e;
-            --shadow: rgba(122,162,247,.2);
-        }
-        .dark {
-            --bg: #0a0a12;
-            --bg2: #0f0f1a;
-            --text: #a9b1d6;
-            --muted: #3b4261;
-            --border: #3b4261;
-            --accent: #6186d6;
-            --accent2: #c99f58;
-            --accent3: #9a7abe;
-            --danger: #d65a73;
-            --shadow: rgba(97,134,214,.15);
-        }
-        body {
-            background: var(--bg);
-            color: var(--text);
-            font-family: 'IBM Plex Mono', monospace;
-            font-size: 14px;
-            image-rendering: pixelated;
-            transition: background .3s, color .3s;
-        }
-        body::before {
-            content: '';
-            position: fixed; inset: 0; z-index: 9998;
-            background: repeating-linear-gradient(0deg, rgba(0,0,0,.03) 0px, rgba(0,0,0,.03) 1px, transparent 1px, transparent 3px);
-            pointer-events: none;
-        }
-        a { color: var(--accent); text-decoration: none; transition: color .15s; }
-        a:hover { color: var(--accent3); }
-        ::selection { background: var(--accent); color: #0f0f1a; }
-
-        .hero {
-            min-height: 100vh;
-            display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
-            gap: 20px; padding: 40px 20px;
-        }
-        .hero .avatar {
-            width: 88px; height: 88px;
-            border: 3px solid #565f89;
-            image-rendering: pixelated;
-            transition: border-color .2s;
-        }
-        .hero .avatar:hover { border-color: #7aa2f7; }
-        .hero .name {
-            font-family: 'Press Start 2P', monospace;
-            font-size: 1.1rem; color: var(--accent2);
-            text-shadow: 2px 2px 0 var(--bg), 3px 3px 0 rgba(122,162,247,.3);
-            letter-spacing: 1px;
-        }
-        .hero-links { display: flex; gap: 16px; }
-        .hero-links a {
-            color: var(--muted); font-size: .75rem;
-            border: 2px solid var(--muted);
-            padding: 6px 16px;
-            transition: all .15s;
-            position: relative;
-        }
-        .hero-links a:hover {
-            color: var(--accent2); border-color: var(--accent2);
-            transform: translate(-2px, -2px);
-            box-shadow: 3px 3px 0 var(--accent);
-        }
-        .hero .stats img {
-            max-width: 380px; border: 2px solid var(--border);
-            image-rendering: auto;
-        }
-
-        .header {
-            position: sticky; top: 0; z-index: 10;
-            background: var(--bg);
-            border-bottom: 2px solid var(--border);
-            padding: 8px 20px;
-            display: flex; align-items: center; justify-content: center; gap: 10px;
-            transition: background .3s;
-        }
-        .header .avatar { width: 24px; height: 24px; border: 2px solid var(--border); image-rendering: pixelated; }
-        .header .name { font-family: 'Press Start 2P', monospace; font-size: .55rem; color: var(--accent2); }
-        .header-links { display: flex; gap: 10px; margin-left: 8px; }
-        .header-links a { color: var(--muted); font-size: .65rem; border: none; padding: 0; }
-        .header-links a:hover { color: var(--accent3); border: none; box-shadow: none; transform: none; }
-        .header-toggle {
-            background: none; border: 2px solid var(--muted);
-            color: var(--muted); cursor: pointer;
-            padding: 4px 12px; font-size: .6rem; margin-left: 6px;
-            font-family: 'IBM Plex Mono', monospace;
-            transition: all .15s;
-        }
-        .header-toggle:hover { border-color: var(--accent2); color: var(--accent2); transform: translate(-1px, -1px); box-shadow: 2px 2px 0 var(--accent); }
-
-        .theme-btn {
-            position: fixed; top: 14px; right: 18px; z-index: 20;
-            background: none; border: 2px solid var(--muted); cursor: pointer;
-            width: 36px; height: 36px;
-            font-size: .9rem; line-height: 1;
-            color: var(--muted);
-            transition: all .15s;
-            display: flex; align-items: center; justify-content: center;
-        }
-        .theme-btn:hover { border-color: var(--accent2); color: var(--accent2); transform: translate(-1px, -1px); box-shadow: 2px 2px 0 var(--accent); }
-
-        #cursor-glow {
-            position: fixed; pointer-events: none; z-index: 999;
-            width: 200px; height: 200px;
-            transform: translate(-50%, -50%);
-            background: radial-gradient(circle, rgba(122,162,247,.06) 0%, transparent 70%);
-        }
-
-        #repos-overlay {
-            display: none; position: fixed; inset: 0; z-index: 30;
-            background: rgba(0,0,0,.6);
-        }
-        #repos-overlay.show { display: block; }
-        #repos-panel {
-            position: fixed; top: 56px; left: 50%; transform: translateX(-50%);
-            z-index: 31;
-            width: min(680px, calc(100vw - 32px));
-            max-height: calc(100vh - 80px);
-            overflow-y: auto;
-            background: var(--bg2);
-            border: 2px solid var(--border);
-            padding: 24px;
-            display: none;
-            box-shadow: 6px 6px 0 var(--shadow);
-        }
-        #repos-panel.show { display: block; }
-        #repos-panel::-webkit-scrollbar { width: 6px; }
-        #repos-panel::-webkit-scrollbar-thumb { background: var(--border); }
-        #repos-panel .close-btn {
-            float: right; background: none; border: 2px solid var(--muted);
-            color: var(--muted); cursor: pointer;
-            width: 28px; height: 28px;
-            font-size: .8rem; line-height: 1;
-            transition: all .15s;
-        }
-        #repos-panel .close-btn:hover { border-color: var(--danger); color: var(--danger); }
-        #repos-panel .section-title {
-            font-family: 'Press Start 2P', monospace;
-            font-size: .55rem; margin-bottom: 20px;
-            color: var(--muted); letter-spacing: 1px;
-        }
-
-        .repo {
-            background: transparent;
-            border: 2px solid var(--border);
-            padding: 14px 18px;
-            margin-bottom: 10px;
-            transition: all .15s;
-        }
-        .repo:hover { border-color: var(--accent); transform: translate(-2px, -2px); box-shadow: 4px 4px 0 var(--shadow); }
-        .repo-top { display: flex; align-items: center; gap: 6px; }
-        .repo-name { font-family: 'Press Start 2P', monospace; font-size: .5rem; color: var(--accent2); font-weight: 400; }
-        .repo-name:hover { color: var(--accent3); }
-        .repo-desc { font-size: .75rem; color: var(--muted); margin-top: 6px; line-height: 1.5; }
-        .repo-meta { display: flex; gap: 12px; margin-top: 8px; font-size: .65rem; color: var(--muted); }
-        .repo-lang { display: flex; align-items: center; gap: 4px; }
-        .lang-dot { width: 8px; height: 8px; border-radius: 0; display: inline-block; border: 1px solid var(--border); }
-        .repo-readme {
-            font-size: .75rem; color: var(--muted);
-            margin-top: 10px; padding-top: 10px;
-            border-top: 2px solid var(--border);
-            line-height: 1.6; white-space: pre-wrap;
-            max-height: 200px; overflow-y: auto;
-        }
-        .repo-readme::-webkit-scrollbar { width: 4px; }
-        .repo-readme::-webkit-scrollbar-thumb { background: var(--muted); }
-        .readme-toggle, .code-toggle {
-            background: none; border: none; cursor: pointer;
-            font-size: .65rem; color: var(--muted); margin-top: 6px;
-            font-family: 'IBM Plex Mono', monospace;
-            transition: color .15s;
-        }
-        .readme-toggle:hover, .code-toggle:hover { color: var(--accent); }
-        .repo-files { font-size: .65rem; color: var(--muted); margin-top: 8px; padding-top: 8px; border-top: 2px solid var(--border); max-height: 300px; overflow-y: auto; }
-        .repo-files a { display: block; color: var(--muted); padding: 3px 0; }
-        .repo-files a:hover { color: var(--accent3); }
-        .repo-files .file { padding-left: 14px; }
-        .repo-code { margin-top: 8px; border: 2px solid var(--border); max-height: 350px; overflow: auto; }
-        .repo-code .CodeMirror { height: auto; font-size: .7rem; }
-        .loading { text-align: center; color: var(--muted); padding: 30px; font-size: .75rem; }
-
-        @media (max-width: 600px) {
-            .hero .avatar { width: 72px; height: 72px; }
-            .hero .name { font-size: .8rem; }
-            .hero-links a { font-size: .65rem; padding: 4px 12px; }
-            .hero .stats img { max-width: 100%; }
-            .header { padding: 6px 12px; }
-            .header .name { font-size: .45rem; }
-            .header-toggle { font-size: .5rem; padding: 3px 8px; }
-            .theme-btn { width: 32px; height: 32px; font-size: .8rem; top: 10px; right: 12px; }
-            #repos-panel { top: 0; left: 0; transform: none; width: 100%; height: 100%; max-height: 100%; border-radius: 0; padding: 16px; box-shadow: none; }
-            #cursor-glow { display: none; }
-            .repo { padding: 10px 12px; }
-            .repo-name { font-size: .45rem; }
-            .section-title { font-size: .45rem; }
-        }
-    </style>
+    <link rel="stylesheet" href="css/main.css">
 </head>
 <body>
     <button class="theme-btn" onclick="toggleTheme()" aria-label="테마 전환">🌙</button>
@@ -230,6 +21,8 @@
         <div class="header-links">
             <a href="https://github.com/tomato332" target="_blank">github</a>
             <a href="game/index.html" target="_blank">game</a>
+            <a href="#" id="headerClickerBtn">clicker</a>
+            <a href="#" id="headerShopBtn">shop</a>
         </div>
         <button class="header-toggle" id="toggleReposBtn">▾ repos</button>
     </div>
@@ -245,15 +38,54 @@
 
     <!-- Hero -->
     <div class="hero" id="hero">
-        <img class="avatar" src="https://avatars.githubusercontent.com/tomato332" alt="tomato332" />
+        <div class="avatar-wrap">
+            <img class="avatar" src="https://avatars.githubusercontent.com/tomato332" alt="tomato332" />
+        </div>
         <div class="name">tomato332</div>
         <div class="hero-links">
             <a href="https://github.com/tomato332" target="_blank">github</a>
             <a href="game/index.html" target="_blank">game</a>
+            <a href="#" id="heroClickerBtn">clicker</a>
+            <a href="#" id="heroShopBtn">shop</a>
         </div>
         <div class="stats">
             <img src="https://github-readme-stats.vercel.app/api?username=tomato332&show_icons=true&theme=dark&bg_color=0d1117&border_color=30363d&text_color=c9d1d9&icon_color=58a6ff" alt="GitHub Stats" />
         </div>
+    </div>
+
+    <!-- Floating clicker panel -->
+    <div id="clicker-overlay"></div>
+    <div id="clicker-panel">
+        <button class="close-btn" id="closeClickerBtn">✕</button>
+        <div class="section-title">🍅 Tomato Clicker</div>
+        <div class="clicker-label">TOMATOES</div>
+        <div class="clicker-score" id="clicker-score">0</div>
+        <div class="clicker-tomato" id="clicker-tomato">🍅</div>
+        <div style="font-size:.6rem;color:var(--muted);font-family:'Press Start 2P',monospace;margin-bottom:12px;">→ CLICK THE TOMATO ←</div>
+        <div class="clicker-stat-row">
+            <span class="label">CLICK POWER</span>
+            <span class="value" id="clicker-power">+1</span>
+        </div>
+        <div class="clicker-stat-row">
+            <span class="label">AUTO CLICK /s</span>
+            <span class="value" id="clicker-auto">0</span>
+        </div>
+        <div style="margin-top:12px;border-top:2px solid var(--border);padding-top:12px;">
+            <button class="clicker-btn" id="upgrade-power" data-cost="10">⬆ UPGRADE POWER (10 🍅)</button>
+            <button class="clicker-btn" id="upgrade-auto" data-cost="25">⏰ AUTO CLICKER (25 🍅)</button>
+        </div>
+        <div style="margin-top:8px;font-size:.6rem;color:var(--muted);" id="clicker-stats">
+            TOTAL CLICKS: 0
+        </div>
+    </div>
+
+    <!-- Floating shop panel -->
+    <div id="shop-overlay"></div>
+    <div id="shop-panel">
+        <button class="close-btn" id="closeShopBtn">✕</button>
+        <div class="section-title">🛒 Decoration Shop</div>
+        <div class="shop-balance" id="shop-balance">🍅 0</div>
+        <div id="shop-items"></div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -265,411 +97,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/mode/xml/xml.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/mode/clike/clike.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/mode/shell/shell.min.js"></script>
-    <script>
-        // ── 딸각 사운드 ──
-        let audioCtx;
-        function playTick(style = 'click') {
-            try {
-                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                const t = audioCtx.currentTime;
-
-                if (style === 'hover') {
-                    const o = audioCtx.createOscillator();
-                    const g = audioCtx.createGain();
-                    o.type = 'sine';
-                    o.frequency.value = 2000;
-                    g.gain.setValueAtTime(0.02, t);
-                    g.gain.exponentialRampToValueAtTime(0.001, t + 0.02);
-                    o.connect(g); g.connect(audioCtx.destination);
-                    o.start(t); o.stop(t + 0.02);
-                    return;
-                }
-
-                // 딸각! — 노이즈 + 임팔스
-                const bufSize = audioCtx.sampleRate * 0.035;
-                const buf = audioCtx.createBuffer(1, bufSize, audioCtx.sampleRate);
-                const data = buf.getChannelData(0);
-                for (let i = 0; i < bufSize; i++) {
-                    const env = Math.exp(-i / (bufSize * 0.15));
-                    data[i] = (Math.random() * 2 - 1) * env * 0.25;
-                }
-                const noise = audioCtx.createBufferSource();
-                noise.buffer = buf;
-
-                const band = audioCtx.createBiquadFilter();
-                band.type = 'bandpass';
-                band.frequency.value = style === 'open' ? 3000 : style === 'close' ? 1500 : 2500;
-                band.Q.value = 1.2;
-
-                const gain = audioCtx.createGain();
-                gain.gain.setValueAtTime(0.15, t);
-                gain.gain.exponentialRampToValueAtTime(0.001, t + 0.03);
-
-                noise.connect(band); band.connect(gain); gain.connect(audioCtx.destination);
-                noise.start(t); noise.stop(t + 0.035);
-
-                if (style === 'open') {
-                    // 추가 저음
-                    const o2 = audioCtx.createOscillator();
-                    const g2 = audioCtx.createGain();
-                    o2.type = 'sine';
-                    o2.frequency.value = 600;
-                    g2.gain.setValueAtTime(0.05, t + 0.01);
-                    g2.gain.exponentialRampToValueAtTime(0.001, t + 0.06);
-                    o2.connect(g2); g2.connect(audioCtx.destination);
-                    o2.start(t + 0.01); o2.stop(t + 0.06);
-                }
-            } catch {}
-        }
-
-        const html = document.documentElement;
-        const btn = document.querySelector('.theme-btn');
-        const saved = localStorage.getItem('theme');
-        if (saved === 'light') { html.classList.remove('dark'); btn.textContent = '🌙'; }
-        else { html.classList.add('dark'); btn.textContent = '☀️'; }
-        function toggleTheme() {
-            html.classList.toggle('dark');
-            const isDark = html.classList.contains('dark');
-            btn.textContent = isDark ? '☀️' : '🌙';
-            localStorage.setItem('theme', isDark ? 'dark' : 'light');
-            playTick('click');
-        }
-
-        // ── 클릭/호버 사운드 ──
-        document.addEventListener('click', e => {
-            if (e.target.closest('a')) playTick('click');
-            if (e.target.closest('.header-toggle')) playTick('open');
-            if (e.target.closest('.close-btn')) playTick('close');
-            if (e.target.closest('.theme-btn')) return;
-        });
-        document.addEventListener('mouseover', e => {
-            if (e.target.closest('a, button, .theme-btn, .header-toggle')) playTick('hover');
-        });
-
-        // ── 배경과 어울리는 은은한 글로우 ──
-        const glow = document.getElementById('cursor-glow');
-        document.addEventListener('mousemove', e => {
-            glow.style.left = e.clientX + 'px';
-            glow.style.top = e.clientY + 'px';
-        });
-        function subtleGlow() {
-            const isDark = html.classList.contains('dark');
-            const base = isDark ? '255,255,255' : '100,100,140';
-            glow.style.background = `radial-gradient(circle, rgba(${base},0.06) 0%, rgba(${base},0.02) 50%, transparent 70%)`;
-            requestAnimationFrame(subtleGlow);
-        }
-        subtleGlow();
-
-        // ── 레포 토글 (플로팅) ──
-        const panel = document.getElementById('repos-panel');
-        const overlay = document.getElementById('repos-overlay');
-        function showRepos() {
-            panel.classList.add('show');
-            overlay.classList.add('show');
-        }
-        function hideRepos() {
-            panel.classList.remove('show');
-            overlay.classList.remove('show');
-        }
-        document.getElementById('toggleReposBtn').onclick = showRepos;
-        document.getElementById('closeReposBtn').onclick = hideRepos;
-        overlay.onclick = hideRepos;
-
-        // ── 레포 불러오기 ──
-        const langColors = {
-            JavaScript: '#f1e05a', TypeScript: '#3178c6', Python: '#3572A5',
-            HTML: '#e34c26', CSS: '#563d7c', Batchfile: '#C1F12E', null: '#888'
-        };
-
-        async function loadRepos() {
-            const el = document.getElementById('loading');
-
-            // 캐시 확인 (1시간)
-            const cached = localStorage.getItem('repos_cache');
-            const cachedTime = localStorage.getItem('repos_cache_time');
-            if (cached && cachedTime && Date.now() - Number(cachedTime) < 3600000) {
-                renderRepos(JSON.parse(cached));
-                return;
-            }
-
-            try {
-                const res = await fetch('https://api.github.com/users/tomato332/repos?sort=updated&per_page=20');
-                if (!res.ok) throw new Error('API error ' + res.status);
-                const repos = await res.json();
-                localStorage.setItem('repos_cache', JSON.stringify(repos));
-                localStorage.setItem('repos_cache_time', String(Date.now()));
-                renderRepos(repos);
-            } catch (e) {
-                // 캐시라도 있으면 보여줌
-                const backup = localStorage.getItem('repos_cache');
-                if (backup) { renderRepos(JSON.parse(backup)); return; }
-                el.innerHTML = '불러오기 실패 (새로고침 해보세요)';
-            }
-        }
-
-        function renderRepos(repos) {
-            document.getElementById('loading').style.display = 'none';
-            const container = document.getElementById('content');
-
-            for (const repo of repos) {
-
-                const div = document.createElement('div');
-                div.className = 'repo';
-
-                const top = document.createElement('div');
-                top.className = 'repo-top';
-                const name = document.createElement('a');
-                name.className = 'repo-name';
-                name.href = repo.html_url; name.target = '_blank';
-                name.textContent = repo.name;
-                top.appendChild(name);
-                div.appendChild(top);
-
-                if (repo.description) {
-                    const desc = document.createElement('div');
-                    desc.className = 'repo-desc';
-                    desc.textContent = repo.description;
-                    div.appendChild(desc);
-                }
-
-                const meta = document.createElement('div');
-                meta.className = 'repo-meta';
-                if (repo.language) {
-                    const lang = document.createElement('span');
-                    lang.className = 'repo-lang';
-                    const dot = document.createElement('span');
-                    dot.className = 'lang-dot';
-                    dot.style.background = langColors[repo.language] || '#888';
-                    lang.appendChild(dot);
-                    lang.append(' ' + repo.language);
-                    meta.appendChild(lang);
-                }
-                if (repo.stargazers_count > 0) {
-                    const star = document.createElement('span');
-                    star.textContent = `★ ${repo.stargazers_count}`;
-                    meta.appendChild(star);
-                }
-                if (repo.fork) {
-                    const fork = document.createElement('span');
-                    fork.textContent = 'forked';
-                    meta.appendChild(fork);
-                }
-                div.appendChild(meta);
-
-                // 코드 보기 버튼
-                const codeBtn = document.createElement('button');
-                codeBtn.className = 'code-toggle';
-                codeBtn.textContent = '📂 코드 보기';
-                const filesDiv = document.createElement('div');
-                filesDiv.className = 'repo-files';
-                filesDiv.id = `files-${repo.id}`;
-                filesDiv.style.display = 'none';
-                const codeDiv = document.createElement('div');
-                codeDiv.className = 'repo-code';
-                codeDiv.id = `code-${repo.id}`;
-                codeDiv.style.display = 'none';
-                let filesLoaded = false;
-                let navStack = []; // 폴더 내비게이션 스택
-                let currentItems = null;
-
-                async function loadDir(url, title) {
-                    filesDiv.innerHTML = '불러오는 중...';
-                    try {
-                        const dRes = await fetch(url);
-                        if (dRes.ok) {
-                            const items = await dRes.json();
-                            currentItems = items;
-                            filesDiv.innerHTML = '';
-                            if (navStack.length > 0) {
-                                const backBtn = document.createElement('a');
-                                backBtn.href = '#';
-                                backBtn.className = 'folder';
-                                backBtn.textContent = '⬆  ..';
-                                backBtn.onclick = (e) => { e.preventDefault(); goBack(); };
-                                filesDiv.appendChild(backBtn);
-                            }
-                            for (const item of items) {
-                                const a = document.createElement('a');
-                                a.href = '#';
-                                a.className = item.type === 'dir' ? 'folder' : 'file';
-                                a.textContent = (item.type === 'dir' ? '📁 ' : '📄 ') + item.name;
-                                if (item.type === 'file') {
-                                    a.onclick = (ev) => loadFile(ev, item, repo);
-                                } else {
-                                    a.onclick = (ev) => {
-                                        ev.preventDefault();
-                                        navStack.push({ url, title });
-                                        loadDir(item.url, item.name);
-                                    };
-                                }
-                                filesDiv.appendChild(a);
-                            }
-                        } else {
-                            filesDiv.innerHTML = '<span style="color:var(--muted)">⚠ API 제한으로 불러올 수 없습니다</span>';
-                        }
-                    } catch (_) {
-                        filesDiv.innerHTML = '<span style="color:var(--muted)">⚠ 불러오기 실패</span>';
-                    }
-                }
-
-                function goBack() {
-                    const prev = navStack.pop();
-                    if (prev) loadDir(prev.url, prev.title);
-                }
-
-                codeBtn.onclick = async () => {
-                    if (filesDiv.style.display === 'none') {
-                        filesDiv.style.display = 'block';
-                        codeBtn.textContent = '📁 코드 닫기';
-                        if (!filesLoaded) {
-                            filesLoaded = true;
-                            filesDiv.innerHTML = `<a href="${repo.html_url}" target="_blank" style="color:var(--muted);display:block;padding:4px 0;">📂 GitHub 저장소 열기 →</a>`;
-                            filesDiv.innerHTML += `<div style="margin-top:8px;font-size:.8rem;color:var(--muted)">GitHub 페이지에서 파일을 찾아서 선택하세요</div>`;
-                        }
-                    } else {
-                        filesDiv.style.display = 'none';
-                        codeDiv.style.display = 'none';
-                        codeBtn.textContent = '📂 코드 보기';
-                    }
-                };
-                div.appendChild(codeBtn);
-                div.appendChild(filesDiv);
-                div.appendChild(codeDiv);
-
-                // README는 버튼 누를 때만 로드
-                const readmeCache = localStorage.getItem(`readme_${repo.id}`);
-                if (readmeCache) {
-                    addReadme(div, repo, readmeCache);
-                } else {
-                    // 버튼은 달아두고 내용은 없음
-                    addReadme(div, repo, '');
-                }
-
-                container.appendChild(div);
-            }
-        }
-
-        const extMap = {
-            js: 'javascript', ts: 'javascript', jsx: 'javascript', tsx: 'javascript',
-            py: 'python', rb: 'python',
-            html: 'htmlmixed', htm: 'htmlmixed',
-            css: 'css', scss: 'css', less: 'css',
-            xml: 'xml', svg: 'xml',
-            json: 'javascript',
-            md: 'markdown',
-            java: 'text/x-java', c: 'text/x-csrc', cpp: 'text/x-c++src', h: 'text/x-csrc',
-            go: 'go', rs: 'rust',
-            sh: 'shell', bash: 'shell', zsh: 'shell',
-            yml: 'yaml', yaml: 'yaml',
-            sql: 'sql',
-            php: 'php',
-            swift: 'swift', kt: 'kotlin',
-        };
-        let cmInstance = null;
-
-        // raw.githubusercontent.com으로 파일 내용 긁어오기 (API 제한 없음)
-        window.viewRawFile = async (fullName, branch, repoId) => {
-            const input = document.getElementById(`raw-input-${repoId}`);
-            const path = input.value.trim();
-            if (!path) return;
-            const codeDiv = document.getElementById(`code-${repoId}`);
-            codeDiv.style.display = 'block';
-            codeDiv.innerHTML = '불러오는 중...';
-            try {
-                const res = await fetch(`https://raw.githubusercontent.com/${fullName}/${branch}/${path}`);
-                if (res.ok) {
-                    const content = await res.text();
-                    const ext = path.split('.').pop();
-                    const mode = extMap[ext] || 'text/plain';
-                    codeDiv.innerHTML = '';
-                    CodeMirror(codeDiv, {
-                        value: content,
-                        mode: mode,
-                        theme: html.classList.contains('dark') ? 'darcula' : 'default',
-                        lineNumbers: false,
-                        readOnly: true,
-                        viewportMargin: Infinity,
-                    });
-                } else {
-                    codeDiv.innerHTML = '<span style="color:var(--muted)">파일을 찾을 수 없습니다. 경로를 확인해보세요.</span>';
-                }
-            } catch (_) {
-                codeDiv.innerHTML = '<span style="color:var(--muted)">불러오기 실패</span>';
-            }
-        };
-
-        async function loadFile(e, item, repo) {
-            e.preventDefault();
-            const codeDiv = document.getElementById(`code-${repo.id}`);
-            codeDiv.style.display = 'block';
-            codeDiv.innerHTML = '';
-            try {
-                const fRes = await fetch(item.url);
-                if (fRes.ok) {
-                    const fData = await fRes.json();
-                    const content = atob(fData.content.replace(/\n/g, ''));
-                    const ext = item.name.split('.').pop();
-                    const mode = extMap[ext] || 'text/plain';
-                    cmInstance = CodeMirror(codeDiv, {
-                        value: content,
-                        mode: mode,
-                        theme: html.classList.contains('dark') ? 'darcula' : 'default',
-                        lineNumbers: false,
-                        readOnly: true,
-                        viewportMargin: Infinity,
-                    });
-                } else {
-                    codeDiv.textContent = '파일을 불러올 수 없습니다 (크면 GitHub에서 확인)';
-                }
-            } catch (_) {
-                codeDiv.textContent = '불러오기 실패';
-            }
-        }
-
-        function addReadme(div, repo, txt) {
-            if (!txt || txt.trim().length === 0) return;
-            const re = document.createElement('div');
-            re.className = 'repo-readme';
-            re.id = `rm-${repo.id}`;
-            try { re.innerHTML = marked.parse(txt); } catch { re.textContent = txt; }
-            re.style.display = 'none';
-            const tg = document.createElement('button');
-            tg.className = 'readme-toggle';
-            tg.textContent = '📖 README 보기';
-            let readmeFetched = false;
-            tg.onclick = async () => {
-                if (!readmeFetched) {
-                    // 캐시 확인
-                    const cached = localStorage.getItem(`readme_${repo.id}`);
-                    if (cached) {
-                        try { re.innerHTML = marked.parse(cached); } catch { re.textContent = cached; }
-                        readmeFetched = true;
-                    } else {
-                        try {
-                            const rr = await fetch(`https://raw.githubusercontent.com/${repo.full_name}/${repo.default_branch}/README.md`);
-                            if (rr.ok) {
-                                const txt = await rr.text();
-                                localStorage.setItem(`readme_${repo.id}`, txt);
-                                try { re.innerHTML = marked.parse(txt); } catch { re.textContent = txt; }
-                                readmeFetched = true;
-                            }
-                        } catch (_) {}
-                    }
-                }
-                const h = re.style.display === 'none';
-                re.style.display = h ? 'block' : 'none';
-                tg.textContent = h ? '📕 접기' : '📖 README 보기';
-            };
-            div.appendChild(tg);
-            div.appendChild(re);
-        }
-        // 5초 후에도 캐시 없으면 조용히 넘어감
-        setTimeout(() => {
-            document.querySelectorAll('.loading').forEach(el => {
-                if (el.style.display !== 'none') el.style.display = 'none';
-            });
-        }, 8000);
-        loadRepos();
-    </script>
+    <script type="module" src="src/main.js"></script>
 </body>
 </html>

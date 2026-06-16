@@ -1,0 +1,22 @@
+/* header.css — 헤더 */
+.header {
+    position: sticky; top: 0; z-index: 10;
+    background: var(--bg);
+    border-bottom: 2px solid var(--border);
+    padding: 8px 20px;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    transition: background .3s;
+}
+.header .avatar { width: 24px; height: 24px; border: 2px solid var(--border); image-rendering: pixelated; }
+.header .name { font-family: 'Press Start 2P', monospace; font-size: .55rem; color: var(--accent2); }
+.header-links { display: flex; gap: 10px; margin-left: 8px; }
+.header-links a { color: var(--muted); font-size: .65rem; border: none; padding: 0; }
+.header-links a:hover { color: var(--accent3); border: none; box-shadow: none; transform: none; }
+.header-toggle {
+    background: none; border: 2px solid var(--muted);
+    color: var(--muted); cursor: pointer;
+    padding: 4px 12px; font-size: .6rem; margin-left: 6px;
+    font-family: 'IBM Plex Mono', monospace;
+    transition: all .15s;
+}
+.header-toggle:hover { border-color: var(--accent2); color: var(--accent2); transform: translate(-1px, -1px); box-shadow: 2px 2px 0 var(--accent); }

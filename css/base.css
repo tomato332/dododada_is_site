@@ -1,0 +1,43 @@
+/* base.css — Reset, 변수, body 기본 스타일 */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+    --bg: #1a1b2e;
+    --bg2: #1a1b2e;
+    --text: #c0caf5;
+    --muted: #565f89;
+    --border: #565f89;
+    --accent: #7aa2f7;
+    --accent2: #e0af68;
+    --accent3: #bb9af7;
+    --danger: #f7768e;
+    --shadow: rgba(122,162,247,.2);
+}
+.dark {
+    --bg: #0a0a12;
+    --bg2: #0f0f1a;
+    --text: #a9b1d6;
+    --muted: #3b4261;
+    --border: #3b4261;
+    --accent: #6186d6;
+    --accent2: #c99f58;
+    --accent3: #9a7abe;
+    --danger: #d65a73;
+    --shadow: rgba(97,134,214,.15);
+}
+body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 14px;
+    image-rendering: pixelated;
+    transition: background .3s, color .3s;
+}
+body::before {
+    content: '';
+    position: fixed; inset: 0; z-index: 9998;
+    background: repeating-linear-gradient(0deg, rgba(0,0,0,.03) 0px, rgba(0,0,0,.03) 1px, transparent 1px, transparent 3px);
+    pointer-events: none;
+}
+a { color: var(--accent); text-decoration: none; transition: color .15s; }
+a:hover { color: var(--accent3); }
+::selection { background: var(--accent); color: #0f0f1a; }

@@ -1,0 +1,7 @@
+/* glow.css — 커서 글로우 */
+#cursor-glow {
+    position: fixed; pointer-events: none; z-index: 999;
+    width: 200px; height: 200px;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle, rgba(122,162,247,.06) 0%, transparent 70%);
+}
