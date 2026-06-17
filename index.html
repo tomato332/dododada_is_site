@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="css/main.css">
 </head>
 <body>
-    <button class="theme-btn" onclick="toggleTheme()" aria-label="테마 전환">🌙</button>
+    <button class="theme-btn" onclick="toggleTheme()" aria-label="Toggle theme">🌙</button>
     <div id="cursor-glow"></div>
 
     <!-- Header -->
@@ -24,7 +24,14 @@
             <a href="#" id="headerClickerBtn">clicker</a>
             <a href="#" id="headerShopBtn">shop</a>
         </div>
+        <div class="header-bgm">
+            <a href="#" id="bgmBtn">🎵</a>
+            <select id="bgmSelect"></select>
+            <span id="bgmNotice" class="bgm-notice">📻 Radio streams may contain ads</span>
+        </div>
         <button class="header-toggle" id="toggleReposBtn">▾ repos</button>
+        <button class="header-collapse" id="headerCollapseBtn" title="Collapse header">▲</button>
+    </div>
     </div>
 
     <!-- Floating repos panel -->
@@ -32,7 +39,7 @@
     <div id="repos-panel">
         <button class="close-btn" id="closeReposBtn">✕</button>
         <div class="section-title">Repositories</div>
-        <div class="loading" id="loading">불러오는 중...</div>
+        <div class="loading" id="loading">Loading...</div>
         <div id="content"></div>
     </div>
 

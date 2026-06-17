@@ -5,15 +5,15 @@ import { getState } from './clicker.js';
 const SHOP_SAVE = 'tomato_shop';
 
 const ITEMS = [
-    { id: 'border-glow', icon: '✨', name: 'BORDER GLOW', desc: '사이트 테두리에 은은한 빛을 더합니다', cost: 50 },
-    { id: 'avatar-hat', icon: '🎩', name: 'AVATAR HAT', desc: '프로필 아바타에 모자를 씌웁니다', cost: 100 },
-    { id: 'big-tomato', icon: '🍅', name: 'BIG TOMATO', desc: '클릭커 토마토가 더 커집니다', cost: 150 },
-    { id: 'rainbow-name', icon: '🌈', name: 'RAINBOW NAME', desc: '이름이 무지개색으로 빛납니다', cost: 300 },
-    { id: 'snowfall', icon: '❄️', name: 'SNOWFALL', desc: '사이트에 눈이 내립니다', cost: 500 },
-    { id: 'scroll-glow', icon: '🖱️', name: 'SCROLL GLOW', desc: '스크롤바가 형광색으로 빛납니다', cost: 800 },
-    { id: 'starfield', icon: '🌌', name: 'STARFIELD BG', desc: '배경에 별이 반짝입니다', cost: 1500 },
-    { id: 'tomato-rain', icon: '🍅', name: 'TOMATO RAIN', desc: '토마토가 화면에 떨어집니다', cost: 3000 },
-    { id: 'matrix-rain', icon: '💚', name: 'MATRIX RAIN', desc: '매트릭스 코드가 쏟아집니다', cost: 5000 },
+{ id: 'border-glow', icon: '✨', name: 'BORDER GLOW', desc: 'Adds a subtle glow around the site border', cost: 50 },
+        { id: 'avatar-hat', icon: '🎩', name: 'AVATAR HAT', desc: 'Puts a hat on your profile avatar', cost: 100 },
+        { id: 'big-tomato', icon: '🍅', name: 'BIG TOMATO', desc: 'Makes the clicker tomato bigger', cost: 150 },
+        { id: 'rainbow-name', icon: '🌈', name: 'RAINBOW NAME', desc: 'Your name glows in rainbow colors', cost: 300 },
+        { id: 'snowfall', icon: '❄️', name: 'SNOWFALL', desc: 'Snow falls across the site', cost: 500 },
+        { id: 'scroll-glow', icon: '🖱️', name: 'SCROLL GLOW', desc: 'Scrollbar glows in neon color', cost: 800 },
+        { id: 'starfield', icon: '🌌', name: 'STARFIELD BG', desc: 'Stars twinkle in the background', cost: 1500 },
+        { id: 'tomato-rain', icon: '🍅', name: 'TOMATO RAIN', desc: 'Tomatoes rain down the screen', cost: 3000 },
+        { id: 'matrix-rain', icon: '💚', name: 'MATRIX RAIN', desc: 'Matrix code rains down', cost: 5000 },
 ];
 
 let owned = []; // [{ id: 'border-glow', active: true }, ...]

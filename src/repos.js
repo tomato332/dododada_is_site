@@ -50,7 +50,7 @@ async function loadRepos() {
     } catch (e) {
         const backup = localStorage.getItem('repos_cache');
         if (backup) { renderRepos(JSON.parse(backup)); return; }
-        el.innerHTML = '불러오기 실패 (새로고침 해보세요)';
+        el.innerHTML = 'Failed to load. Try refreshing.';
     }
 }
 
@@ -117,7 +117,7 @@ function createRepoMeta(repo) {
 function createCodeViewer(repo) {
     const codeBtn = document.createElement('button');
     codeBtn.className = 'code-toggle';
-    codeBtn.textContent = '📂 코드 보기';
+    codeBtn.textContent = '📂 View code';
     const filesDiv = document.createElement('div');
     filesDiv.className = 'repo-files';
     filesDiv.id = `files-${repo.id}`;
@@ -130,7 +130,7 @@ function createCodeViewer(repo) {
     const navStack = [];
 
     async function loadDir(url, title) {
-        filesDiv.innerHTML = '불러오는 중...';
+        filesDiv.innerHTML = 'Loading...';
         try {
             const dRes = await fetch(url);
             if (dRes.ok) {
@@ -161,55 +161,30 @@ function createCodeViewer(repo) {
                     filesDiv.appendChild(a);
                 }
             } else {
-                filesDiv.innerHTML = '<span style="color:var(--muted)">⚠ API 제한으로 불러올 수 없습니다</span>';
+                filesDiv.innerHTML = '<span style="color:var(--muted)">⚠ API rate limit reached</span>';
             }
         } catch (_) {
-            filesDiv.innerHTML = '<span style="color:var(--muted)">⚠ 불러오기 실패</span>';
+            filesDiv.innerHTML = '<span style="color:var(--muted)">⚠ Load failed</span>';
         }
     }
 
     codeBtn.onclick = async () => {
         if (filesDiv.style.display === 'none') {
             filesDiv.style.display = 'block';
-            codeBtn.textContent = '📁 코드 닫기';
+            codeBtn.textContent = '📁 Close code';
             if (!filesLoaded) {
                 filesLoaded = true;
-                filesDiv.innerHTML = `<a href="${repo.html_url}" target="_blank" style="color:var(--muted);display:block;padding:4px 0;">📂 GitHub 저장소 열기 →</a>`;
-                filesDiv.innerHTML += '<div style="margin-top:8px;font-size:.8rem;color:var(--muted)">GitHub 페이지에서 파일을 찾아서 선택하세요</div>';
+                filesDiv.innerHTML = `<a href="${repo.html_url}" target="_blank" style="color:var(--muted);display:block;padding:4px 0;">📂 Open on GitHub →</a>`;
+                filesDiv.innerHTML += '<div style="margin-top:8px;font-size:.8rem;color:var(--muted)">Browse files on GitHub and select a file to view</div>';
             }
         } else {
             filesDiv.style.display = 'none';
             codeDiv.style.display = 'none';
-            codeBtn.textContent = '📂 코드 보기';
+            codeBtn.textContent = '📂 View code';
         }
     };
 
     return { codeBtn, filesDiv, codeDiv };
-}
-
-async function loadFileContent(e, item, repo) {
-    e.preventDefault();
-    const codeDiv = document.getElementById(`code-${repo.id}`);
-    codeDiv.style.display = 'block';
-    codeDiv.innerHTML = '';
-    try {
-        const fRes = await fetch(item.url);
-        if (fRes.ok) {
-            const fData = await fRes.json();
-            const content = atob(fData.content.replace(/\n/g, ''));
-            const ext = item.name.split('.').pop();
-            const mode = extMap[ext] || 'text/plain';
-            CodeMirror(codeDiv, {
-                value: content, mode,
-                theme: isDark() ? 'darcula' : 'default',
-                lineNumbers: false, readOnly: true, viewportMargin: Infinity,
-            });
-        } else {
-            codeDiv.textContent = '파일을 불러올 수 없습니다 (크면 GitHub에서 확인)';
-        }
-    } catch (_) {
-        codeDiv.textContent = '불러오기 실패';
-    }
 }
 
 function addReadmeButton(div, repo) {
@@ -223,7 +198,7 @@ function addReadmeButton(div, repo) {
     }
     const tg = document.createElement('button');
     tg.className = 'readme-toggle';
-    tg.textContent = '📖 README 보기';
+    tg.textContent = '📖 View README';
     let readmeFetched = !!cached;
     tg.onclick = async () => {
         if (!readmeFetched) {
@@ -245,7 +220,7 @@ function addReadmeButton(div, repo) {
         }
         const h = re.style.display === 'none';
         re.style.display = h ? 'block' : 'none';
-        tg.textContent = h ? '📕 접기' : '📖 README 보기';
+        tg.textContent = h ? '📕 Collapse' : '📖 View README';
     };
     div.appendChild(tg);
     div.appendChild(re);

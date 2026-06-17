@@ -1,9 +1,29 @@
 // sound.js — WebAudio 딸각 사운드
 let audioCtx;
 
+function ensureCtx() {
+    if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+    }
+}
+
+// 최초 사용자 제스처 감지되면 컨텍스트 생성
+const initOnGesture = () => {
+    ensureCtx();
+    document.removeEventListener('click', initOnGesture);
+    document.removeEventListener('keydown', initOnGesture);
+    document.removeEventListener('touchstart', initOnGesture);
+};
+document.addEventListener('click', initOnGesture, { once: true });
+document.addEventListener('keydown', initOnGesture, { once: true });
+document.addEventListener('touchstart', initOnGesture, { once: true });
+
 export function playTick(style = 'click') {
     try {
-        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        ensureCtx();
         const t = audioCtx.currentTime;
 
         if (style === 'hover') {
