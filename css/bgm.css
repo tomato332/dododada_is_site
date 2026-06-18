@@ -1,0 +1,282 @@
+/* bgm.css — 8비트 BGM 플레이어 패널 */
+.bgm-player {
+    position: fixed;
+    top: 48px; left: 50%; transform: translateX(-50%);
+    z-index: 9;
+    width: min(420px, calc(100vw - 32px));
+    background: var(--bg2);
+    border: 2px solid var(--border);
+    border-top: none;
+    padding: 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height .3s ease, padding .3s ease, border-color .3s;
+    box-shadow: 0 4px 0 var(--shadow);
+}
+.bgm-player.open {
+    max-height: 420px;
+    padding: 14px 18px 16px;
+    border-color: var(--accent2);
+}
+
+.bgm-player-inner {
+    display: flex; flex-direction: column; gap: 10px;
+}
+
+/* ── 트랙 이름 ── */
+.bgm-player-track {
+    text-align: center;
+    font-family: 'Press Start 2P', monospace;
+    font-size: .5rem;
+    color: var(--accent2);
+    letter-spacing: 1px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--border);
+}
+
+/* ── 컨트롤 행 ── */
+.bgm-player-controls {
+    display: flex; align-items: center; gap: 10px;
+    justify-content: center;
+}
+
+.bgm-player-btn {
+    background: none; border: 2px solid var(--muted);
+    color: var(--muted); cursor: pointer;
+    width: 36px; height: 36px;
+    font-size: .9rem; line-height: 1;
+    display: flex; align-items: center; justify-content: center;
+    transition: all .15s;
+    flex-shrink: 0;
+}
+.bgm-player-btn:hover {
+    border-color: var(--accent2); color: var(--accent2);
+    transform: translate(-1px, -1px);
+    box-shadow: 2px 2px 0 var(--accent);
+}
+
+/* ── 볼륨 슬라이더 ── */
+.bgm-volume-wrap {
+    flex: 1; max-width: 120px;
+    display: flex; align-items: center;
+}
+.bgm-volume-slider {
+    -webkit-appearance: none; appearance: none;
+    width: 100%; height: 8px;
+    background: var(--border);
+    border: 2px solid var(--border);
+    outline: none;
+    cursor: pointer;
+    transition: border-color .15s;
+}
+.bgm-volume-slider:hover {
+    border-color: var(--accent2);
+}
+.bgm-volume-slider::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none;
+    width: 14px; height: 14px;
+    background: var(--accent2);
+    border: 2px solid var(--bg);
+    cursor: pointer;
+    image-rendering: pixelated;
+}
+.bgm-volume-slider::-moz-range-thumb {
+    width: 14px; height: 14px;
+    background: var(--accent2);
+    border: 2px solid var(--bg);
+    cursor: pointer;
+}
+
+/* ── 채널 선택 ── */
+.bgm-select {
+    background: var(--bg);
+    color: var(--text);
+    border: 2px solid var(--muted);
+    padding: 4px 6px;
+    font-size: .5rem;
+    font-family: 'Press Start 2P', monospace;
+    cursor: pointer;
+    outline: none;
+    max-width: 130px;
+    transition: border-color .15s;
+}
+.bgm-select:hover { border-color: var(--accent2); }
+.bgm-select option { background: var(--bg2); color: var(--text); }
+
+/* ── AD 공지 ── */
+.bgm-player-notice {
+    text-align: center;
+    font-size: .4rem;
+    color: var(--muted);
+    font-family: 'Press Start 2P', monospace;
+    display: none;
+    white-space: nowrap;
+}
+.bgm-player-notice.show { display: block; }
+
+/* ════════════════════════════════════════
+   스텝 시퀀서
+   ════════════════════════════════════════ */
+.seq-wrapper {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 2px solid var(--border);
+    transition: opacity .3s, max-height .3s, margin .3s, padding .3s;
+    overflow: hidden;
+    max-height: 300px;
+}
+.seq-wrapper.seq-hidden {
+    opacity: 0;
+    max-height: 0;
+    margin: 0;
+    padding: 0;
+    border: none;
+    pointer-events: none;
+}
+
+.seq-container {
+    /* 내부 그리드만 담당 */
+}
+
+.seq-label {
+    text-align: center;
+    font-family: 'Press Start 2P', monospace;
+    font-size: .4rem;
+    color: var(--muted);
+    margin-bottom: 8px;
+    letter-spacing: 2px;
+}
+
+.seq-reset-btn {
+    background: none;
+    border: 2px solid var(--muted);
+    color: var(--muted);
+    cursor: pointer;
+    font-family: 'Press Start 2P', monospace;
+    font-size: .7rem;
+    padding: 4px 10px;
+    transition: all .15s;
+    line-height: 1;
+}
+.seq-reset-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    transform: translate(-1px, -1px);
+    box-shadow: 2px 2px 0 var(--accent);
+}
+
+/* ── 슬롯 목록 ── */
+.seq-slots-list {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.seq-slots-empty {
+    font-family: 'Press Start 2P', monospace;
+    font-size: .95rem;
+    color: var(--muted);
+    text-align: center;
+    padding: 6px 0;
+}
+.seq-slot-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.seq-slot-name {
+    flex: 1;
+    font-family: 'Press Start 2P', monospace;
+    font-size: .95rem;
+    color: var(--text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.seq-slot-btn {
+    background: none;
+    border: 1px solid var(--muted);
+    color: var(--muted);
+    cursor: pointer;
+    font-size: .95rem;
+    line-height: 1;
+    padding: 6px 10px;
+    font-family: 'Press Start 2P', monospace;
+    transition: all .1s;
+}
+.seq-slot-btn:hover {
+    border-color: var(--accent2);
+    color: var(--accent2);
+}
+
+.seq-row {
+    display: grid;
+    grid-template-columns: 44px repeat(16, 1fr);
+    gap: 2px;
+    margin-bottom: 2px;
+}
+
+.seq-header-corner {
+    min-width: 0;
+}
+
+.seq-header-cell {
+    text-align: center;
+    font-family: 'Press Start 2P', monospace;
+    font-size: .35rem;
+    color: var(--muted);
+    padding: 2px 0;
+}
+
+.seq-row-label {
+    font-family: 'Press Start 2P', monospace;
+    font-size: .35rem;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 4px;
+    letter-spacing: 1px;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.seq-cell {
+    aspect-ratio: 1;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    transition: all .08s ease;
+    min-width: 0;
+    min-height: 0;
+    cursor: pointer;
+}
+
+.seq-cell:hover {
+    border-color: var(--accent2);
+    opacity: 0.8;
+}
+
+/* 활성화된 비트 (항상 켜져있는 패턴) */
+.seq-cell.seq-active {
+    background: var(--accent);
+    border-color: var(--accent2);
+    opacity: 0.5;
+}
+
+/* 현재 재생 위치 */
+.seq-cell.seq-current {
+    border-color: var(--accent2);
+    border-width: 2px;
+    box-shadow: 0 0 6px var(--accent2);
+}
+
+/* 현재 재생 + 활성 = 히트 */
+.seq-cell.seq-hit {
+    background: var(--accent2);
+    border-color: #fff;
+    opacity: 1;
+    box-shadow: 0 0 10px var(--accent2);
+}

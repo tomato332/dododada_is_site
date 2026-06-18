@@ -1,0 +1,137 @@
+/* pomodoro.css — 🍅 포모도로 타이머 패널 */
+.pomodoro-player {
+    position: fixed;
+    top: 48px; left: 50%; transform: translateX(-50%);
+    z-index: 8;
+    width: min(320px, calc(100vw - 32px));
+    margin-top: 4px;
+    width: min(320px, calc(100vw - 32px));
+    background: var(--bg2);
+    border: 2px solid var(--border);
+    border-top: none;
+    padding: 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height .3s ease, padding .3s ease, border-color .3s;
+    box-shadow: 0 4px 0 var(--shadow);
+}
+.pomodoro-player.open {
+    max-height: 220px;
+    padding: 14px 18px 16px;
+    border-color: var(--accent);
+}
+
+.pomodoro-player-inner {
+    display: flex; flex-direction: column; gap: 10px;
+}
+
+.pomodoro-player-header {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--border);
+}
+.pomodoro-player-icon {
+    font-size: 1rem;
+}
+.pomodoro-player-title {
+    font-family: 'Press Start 2P', monospace;
+    font-size: .5rem;
+    color: var(--accent);
+    letter-spacing: 2px;
+}
+
+.pomodoro-player-body {
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+}
+
+.pomodoro-mode {
+    font-family: 'Press Start 2P', monospace;
+    font-size: .5rem;
+    padding: 4px 10px;
+    border: 2px solid var(--border);
+    letter-spacing: 2px;
+    transition: all .15s;
+}
+.pomodoro-mode.focus {
+    color: var(--accent2);
+    border-color: var(--accent2);
+    background: rgba(122,162,247,.08);
+}
+.pomodoro-mode.break {
+    color: var(--accent3);
+    border-color: var(--accent3);
+    background: rgba(187,154,247,.08);
+}
+
+.pomodoro-display {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 1.6rem;
+    color: var(--text);
+    text-align: center;
+    letter-spacing: 4px;
+    text-shadow: 0 0 8px rgba(255,255,255,.1);
+}
+
+.pomodoro-player-controls {
+    display: flex; align-items: center; gap: 8px;
+}
+
+.pomodoro-btn {
+    background: none;
+    border: 2px solid var(--muted);
+    color: var(--muted);
+    cursor: pointer;
+    font-size: .7rem;
+    line-height: 1;
+    padding: 6px 14px;
+    font-family: 'Press Start 2P', monospace;
+    transition: all .15s;
+}
+.pomodoro-btn:hover {
+    border-color: var(--accent2);
+    color: var(--accent2);
+    transform: translate(-1px, -1px);
+    box-shadow: 2px 2px 0 var(--accent);
+}
+
+.pomodoro-player-sessions {
+    text-align: center;
+    font-family: 'Press Start 2P', monospace;
+    font-size: .4rem;
+    color: var(--muted);
+    padding-top: 6px;
+    border-top: 2px solid var(--border);
+}
+    text-shadow: 0 0 8px rgba(255,255,255,.1);
+}
+
+.pomodoro-player-controls {
+    display: flex; align-items: center; gap: 8px;
+}
+
+.pomodoro-btn {
+    background: none;
+    border: 2px solid var(--muted);
+    color: var(--muted);
+    cursor: pointer;
+    font-size: .7rem;
+    line-height: 1;
+    padding: 6px 14px;
+    font-family: 'Press Start 2P', monospace;
+    transition: all .15s;
+}
+.pomodoro-btn:hover {
+    border-color: var(--accent2);
+    color: var(--accent2);
+    transform: translate(-1px, -1px);
+    box-shadow: 2px 2px 0 var(--accent);
+}
+
+.pomodoro-player-sessions {
+    text-align: center;
+    font-family: 'Press Start 2P', monospace;
+    font-size: .4rem;
+    color: var(--muted);
+    padding-top: 6px;
+    border-top: 2px solid var(--border);
+}

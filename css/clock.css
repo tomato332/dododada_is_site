@@ -1,0 +1,54 @@
+/* clock.css — 닉시관 스타일 시계 */
+#headerClock {
+    display: flex; align-items: center;
+    user-select: none;
+    transition: opacity .3s;
+}
+
+.clock-digits {
+    display: flex; align-items: center; gap: 2px;
+    background: rgba(187, 154, 247, .06);
+    border: 2px solid rgba(187, 154, 247, .15);
+    padding: 3px 6px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: .45rem;
+    letter-spacing: 2px;
+    transition: border-color .3s, background .3s;
+}
+
+.cd-digit {
+    display: inline-block;
+    color: var(--accent3);
+    text-shadow: 0 0 6px rgba(187, 154, 247, .5), 0 0 12px rgba(187, 154, 247, .2);
+    min-width: 10px;
+    text-align: center;
+    transition: color .15s, text-shadow .15s;
+}
+
+.cd-colon {
+    display: inline-block;
+    color: var(--accent3);
+    text-shadow: 0 0 6px rgba(187, 154, 247, .5);
+    min-width: 8px;
+    text-align: center;
+    opacity: .7;
+    transition: opacity .15s;
+}
+
+/* 비트에 맞춰 콜론 깜빡임 */
+.cd-colon.beat {
+    opacity: 1;
+    text-shadow: 0 0 10px rgba(187, 154, 247, .8), 0 0 20px rgba(187, 154, 247, .3);
+}
+
+.header.collapsed .clock-digits {
+    font-size: .35rem;
+    padding: 2px 4px;
+    gap: 1px;
+}
+.header.collapsed .cd-digit {
+    min-width: 8px;
+}
+.header.collapsed .cd-colon {
+    min-width: 6px;
+}

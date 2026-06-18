@@ -23,32 +23,77 @@ const extMap = {
     swift: 'swift', kt: 'kotlin',
 };
 
+let currentUser = localStorage.getItem('repos_username') || 'tomato332';
+
+function updateProfileUI(username) {
+    // 헤더 & 히어로 아바타 업데이트
+    document.querySelectorAll('.avatar').forEach(img => {
+        img.src = `https://avatars.githubusercontent.com/${username}`;
+        img.alt = username;
+    });
+    // 이름 업데이트
+    document.querySelectorAll('.name').forEach(el => {
+        el.textContent = username;
+    });
+    // 헤더/히어로 github 링크 업데이트
+    document.querySelectorAll('.header-links a[href*="github.com"], .hero-links a[href*="github.com"]').forEach(a => {
+        a.href = `https://github.com/${username}`;
+    });
+    // GitHub Stats 이미지 업데이트
+    const statsImg = document.querySelector('.stats img');
+    if (statsImg) {
+        statsImg.src = `https://github-readme-stats.vercel.app/api?username=${username}&show_icons=true&theme=dark&bg_color=0d1117&border_color=30363d&text_color=c9d1d9&icon_color=58a6ff`;
+    }
+}
+
 export function initRepos() {
     const panel = document.getElementById('repos-panel');
     const overlay = document.getElementById('repos-overlay');
     document.getElementById('toggleReposBtn').onclick = () => { panel.classList.add('show'); overlay.classList.add('show'); };
     document.getElementById('closeReposBtn').onclick = () => { panel.classList.remove('show'); overlay.classList.remove('show'); };
     overlay.onclick = () => { panel.classList.remove('show'); overlay.classList.remove('show'); };
-    loadRepos();
+
+    const input = document.getElementById('repos-username-input');
+    const loadBtn = document.getElementById('repos-load-btn');
+    if (input) input.value = currentUser;
+    if (loadBtn) {
+        loadBtn.onclick = () => {
+            const val = input ? input.value.trim() : '';
+            if (!val) return;
+            currentUser = val;
+            localStorage.setItem('repos_username', val);
+            updateProfileUI(val);
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('content').innerHTML = '';
+            loadRepos(currentUser);
+        };
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') loadBtn.click();
+        });
+    }
+
+    loadRepos(currentUser);
 }
 
-async function loadRepos() {
+async function loadRepos(username) {
     const el = document.getElementById('loading');
-    const cached = localStorage.getItem('repos_cache');
-    const cachedTime = localStorage.getItem('repos_cache_time');
+    const cacheKey = `repos_cache_${username}`;
+    const cacheTimeKey = `repos_cache_time_${username}`;
+    const cached = localStorage.getItem(cacheKey);
+    const cachedTime = localStorage.getItem(cacheTimeKey);
     if (cached && cachedTime && Date.now() - Number(cachedTime) < 3600000) {
         renderRepos(JSON.parse(cached));
         return;
     }
     try {
-        const res = await fetch('https://api.github.com/users/tomato332/repos?sort=updated&per_page=20');
+        const res = await fetch(`https://api.github.com/users/${username}/repos?sort=updated&per_page=20`);
         if (!res.ok) throw new Error('API error ' + res.status);
         const repos = await res.json();
-        localStorage.setItem('repos_cache', JSON.stringify(repos));
-        localStorage.setItem('repos_cache_time', String(Date.now()));
+        localStorage.setItem(cacheKey, JSON.stringify(repos));
+        localStorage.setItem(cacheTimeKey, String(Date.now()));
         renderRepos(repos);
     } catch (e) {
-        const backup = localStorage.getItem('repos_cache');
+        const backup = localStorage.getItem(cacheKey);
         if (backup) { renderRepos(JSON.parse(backup)); return; }
         el.innerHTML = 'Failed to load. Try refreshing.';
     }
@@ -168,20 +213,8 @@ function createCodeViewer(repo) {
         }
     }
 
-    codeBtn.onclick = async () => {
-        if (filesDiv.style.display === 'none') {
-            filesDiv.style.display = 'block';
-            codeBtn.textContent = '📁 Close code';
-            if (!filesLoaded) {
-                filesLoaded = true;
-                filesDiv.innerHTML = `<a href="${repo.html_url}" target="_blank" style="color:var(--muted);display:block;padding:4px 0;">📂 Open on GitHub →</a>`;
-                filesDiv.innerHTML += '<div style="margin-top:8px;font-size:.8rem;color:var(--muted)">Browse files on GitHub and select a file to view</div>';
-            }
-        } else {
-            filesDiv.style.display = 'none';
-            codeDiv.style.display = 'none';
-            codeBtn.textContent = '📂 View code';
-        }
+    codeBtn.onclick = () => {
+        window.open(repo.html_url, '_blank');
     };
 
     return { codeBtn, filesDiv, codeDiv };

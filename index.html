@@ -11,7 +11,6 @@
     <link rel="stylesheet" href="css/main.css">
 </head>
 <body>
-    <button class="theme-btn" onclick="toggleTheme()" aria-label="Toggle theme">🌙</button>
     <div id="cursor-glow"></div>
 
     <!-- Header -->
@@ -25,20 +24,72 @@
             <a href="#" id="headerShopBtn">shop</a>
         </div>
         <div class="header-bgm">
-            <a href="#" id="bgmBtn">🎵</a>
-            <select id="bgmSelect"></select>
-            <span id="bgmNotice" class="bgm-notice">📻 Radio streams may contain ads</span>
+            <button id="bgmBtn" class="header-bgm-btn" title="Music Player">🎵</button>
+            <button id="pomodoroBtn" class="header-bgm-btn" title="Pomodoro Timer">🍅</button>
         </div>
+        <span id="headerClock"></span>
+        <button class="theme-btn" id="headerThemeBtn" onclick="toggleTheme()" aria-label="Toggle theme">🌙</button>
         <button class="header-toggle" id="toggleReposBtn">▾ repos</button>
         <button class="header-collapse" id="headerCollapseBtn" title="Collapse header">▲</button>
     </div>
     </div>
 
-    <!-- Floating repos panel -->
+    <!-- BGM Player Panel -->
+    <div id="bgm-player" class="bgm-player">
+        <div class="bgm-player-inner">
+            <div class="bgm-player-track">
+                <span id="bgmTrackName">🌤 Chill Day</span>
+            </div>
+            <div class="bgm-player-controls">
+                <button id="bgmMuteBtn" class="bgm-player-btn" title="Mute">🔇</button>
+                <div class="bgm-volume-wrap">
+                    <input type="range" id="bgmVolume" class="bgm-volume-slider" min="0" max="100" value="70">
+                </div>
+                <select id="bgmSelect" class="bgm-select"></select>
+            </div>
+            <div class="bgm-player-notice" id="bgmNotice">📻 Radio streams may contain ads</div>
+            <div id="seq-wrapper" class="seq-wrapper">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;padding:0 2px;">
+                    <div style="font-family:'Press Start 2P',monospace;font-size:.4rem;color:var(--muted);letter-spacing:2px;">STEP SEQUENCER</div>
+                    <div style="display:flex;gap:3px;">
+                        <button id="seqResetBtn" class="seq-reset-btn">↺</button>
+                        <button id="seqSaveBtn" class="seq-reset-btn">💾</button>
+                        <button id="seqShareBtn" class="seq-reset-btn">📋</button>
+                        <button id="seqImportBtn" class="seq-reset-btn">📂</button>
+                    </div>
+                </div>
+                <div id="seq-container" class="seq-container"></div>
+                <div id="seqSlotsList" class="seq-slots-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pomodoro Timer Panel -->
+    <div id="pomodoro-player" class="pomodoro-player">
+        <div class="pomodoro-player-inner">
+            <div class="pomodoro-player-header">
+                <span class="pomodoro-player-icon">🍅</span>
+                <span class="pomodoro-player-title">POMODORO</span>
+            </div>
+            <div class="pomodoro-player-body">
+                <span class="pomodoro-mode" id="pomodoroMode">FOCUS</span>
+                <span class="pomodoro-display" id="pomodoroDisplay">25:00</span>
+                <div class="pomodoro-player-controls">
+                    <button class="pomodoro-btn" id="pomodoroStart">▶</button>
+                    <button class="pomodoro-btn" id="pomodoroReset">↺</button>
+                </div>
+            </div>
+            <div class="pomodoro-player-sessions" id="pomodoroSessions">SESSIONS: 0</div>
+        </div>
+    </div>
     <div id="repos-overlay"></div>
     <div id="repos-panel">
         <button class="close-btn" id="closeReposBtn">✕</button>
         <div class="section-title">Repositories</div>
+        <div class="repos-user-input-wrap">
+            <input type="text" id="repos-username-input" class="repos-user-input" placeholder="GitHub username..." />
+            <button id="repos-load-btn" class="repos-load-btn">Load</button>
+        </div>
         <div class="loading" id="loading">Loading...</div>
         <div id="content"></div>
     </div>

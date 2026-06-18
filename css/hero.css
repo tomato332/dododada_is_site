@@ -20,7 +20,7 @@
 }
 .hero-links { display: flex; gap: 16px; }
 .hero-links a {
-    color: var(--muted); font-size: .75rem;
+    color: var(--muted); font-size: .85rem;
     border: 2px solid var(--muted);
     padding: 6px 16px;
     transition: all .15s;

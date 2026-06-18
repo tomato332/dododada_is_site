@@ -72,3 +72,23 @@
 .repo-code { margin-top: 8px; border: 2px solid var(--border); max-height: 350px; overflow: auto; }
 .repo-code .CodeMirror { height: auto; font-size: .7rem; }
 .loading { text-align: center; color: var(--muted); padding: 30px; font-size: .75rem; }
+
+/* ── Username input ── */
+.repos-user-input-wrap {
+    display: flex; gap: 8px; margin-bottom: 16px;
+}
+.repos-user-input {
+    flex: 1; padding: 8px 12px;
+    background: var(--bg); border: 2px solid var(--border);
+    color: var(--fg); font-family: 'IBM Plex Mono', monospace;
+    font-size: .75rem; outline: none;
+    transition: border-color .15s;
+}
+.repos-user-input:focus { border-color: var(--accent); }
+.repos-load-btn {
+    padding: 8px 16px; cursor: pointer;
+    background: var(--accent); border: 2px solid var(--accent);
+    color: #fff; font-family: 'Press Start 2P', monospace;
+    font-size: .5rem; transition: all .15s;
+}
+.repos-load-btn:hover { background: var(--accent2); border-color: var(--accent2); }

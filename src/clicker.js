@@ -34,6 +34,8 @@ export function render() {
     btnAuto.textContent = `⏰ AUTO CLICKER (${state.autoCost} 🍅)`;
     btnAuto.disabled = state.score < state.autoCost;
     save();
+    // 샵 잔액 실시간 동기화
+    window.shopRender?.();
 }
 
 function spawnParticle(x, y) {

@@ -1,11 +1,13 @@
 /* theme.css — 테마 버튼 */
-.theme-btn {
-    position: fixed; top: 14px; right: 18px; z-index: 20;
+.theme-btn,
+#headerThemeBtn {
     background: none; border: 2px solid var(--muted); cursor: pointer;
     width: 36px; height: 36px;
     font-size: .9rem; line-height: 1;
     color: var(--muted);
     transition: all .15s;
     display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
 }
-.theme-btn:hover { border-color: var(--accent2); color: var(--accent2); transform: translate(-1px, -1px); box-shadow: 2px 2px 0 var(--accent); }
+.theme-btn:hover,
+#headerThemeBtn:hover { border-color: var(--accent2); color: var(--accent2); transform: translate(-1px, -1px); box-shadow: 2px 2px 0 var(--accent); }

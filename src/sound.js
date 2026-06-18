@@ -1,13 +1,18 @@
 // sound.js — WebAudio 딸각 사운드
 let audioCtx;
 
-function ensureCtx() {
+export function getAudioCtx() {
     if (!audioCtx) {
         audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     }
     if (audioCtx.state === 'suspended') {
         audioCtx.resume();
     }
+    return audioCtx;
+}
+
+function ensureCtx() {
+    getAudioCtx();
 }
 
 // 최초 사용자 제스처 감지되면 컨텍스트 생성

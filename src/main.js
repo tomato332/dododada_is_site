@@ -6,6 +6,9 @@ import { initRepos } from './repos.js';
 import { initClicker, render } from './clicker.js';
 import { initShop } from './shop.js';
 import { initBgm } from './bgm.js';
+import { initClock } from './clock.js';
+import { initSequencer } from './sequencer.js';
+import { initPomodoro } from './pomodoro.js';
 
 // 전역 노출 (inline onclick 대응)
 window.toggleTheme = function() {
@@ -31,6 +34,9 @@ initRepos();
 initClicker();
 initShop();
 initBgm();
+initSequencer();
+initPomodoro();
+initClock();
 
 // ── 헤더 접기 ──
 (function() {
