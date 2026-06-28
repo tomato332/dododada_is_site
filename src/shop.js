@@ -1,7 +1,6 @@
 // shop.js — 🛒 데코레이션 상점
 import { playTick } from './sound.js';
 import { getState } from './clicker.js';
-import { updateContext } from './achievements.js';
 
 const SHOP_SAVE = 'tomato_shop';
 
@@ -191,7 +190,6 @@ function renderShop() {
                 owned.push({ id: item.id, active: true });
                 save();
                 applyDecorations();
-                updateContext({ shopCount: owned.length });
                 if (window.clickerRender) window.clickerRender();
                 renderShop();
                 playTick('open');

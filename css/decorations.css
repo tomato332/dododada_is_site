@@ -59,25 +59,3 @@ body.has-scroll-glow ::-webkit-scrollbar-track {
     0% { opacity: .1; transform: scale(.8); }
     100% { opacity: .6; transform: scale(1.2); }
 }
-
-/* ── 강화 토스트 ── */
-.enhance-toast {
-    position: fixed;
-    top: 50%; left: 50%; transform: translate(-50%, -50%) scale(.8);
-    z-index: 10000;
-    background: var(--bg2);
-    border: 2px solid var(--accent2);
-    padding: 16px 24px;
-    font-family: 'Press Start 2P', monospace;
-    font-size: .6rem;
-    color: var(--text);
-    text-align: center;
-    box-shadow: 0 0 30px rgba(122,162,247,.3);
-    opacity: 0;
-    transition: all .3s cubic-bezier(.4,0,.2,1);
-    pointer-events: none;
-}
-.enhance-toast.show {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1);
-}

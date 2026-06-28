@@ -4,7 +4,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>tomato332</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍅</text></svg>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/codemirror.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/theme/darcula.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -23,12 +22,10 @@
             <a href="game/index.html" target="_blank">game</a>
             <a href="#" id="headerClickerBtn">clicker</a>
             <a href="#" id="headerShopBtn">shop</a>
-            <a href="#" id="headerSlotBtn">slot</a>
         </div>
         <div class="header-bgm">
             <button id="bgmBtn" class="header-bgm-btn" title="Music Player">🎵</button>
             <button id="pomodoroBtn" class="header-bgm-btn" title="Pomodoro Timer">🍅</button>
-            <button id="achBtn" class="header-bgm-btn" title="Achievements">🏆</button>
         </div>
         <span id="headerClock"></span>
         <button class="theme-btn" id="headerThemeBtn" onclick="toggleTheme()" aria-label="Toggle theme">🌙</button>
@@ -85,18 +82,6 @@
             <div class="pomodoro-player-sessions" id="pomodoroSessions">SESSIONS: 0</div>
         </div>
     </div>
-
-    <!-- Achievements Panel -->
-    <div id="ach-panel" class="ach-panel">
-        <div class="ach-panel-inner">
-            <div class="ach-panel-header">
-                <span style="font-size:1rem;">🏆</span>
-                <span style="font-family:'Press Start 2P',monospace;font-size:.5rem;color:var(--accent3);letter-spacing:2px;">ACHIEVEMENTS</span>
-                <span id="achCount" style="font-family:'Press Start 2P',monospace;font-size:.4rem;color:var(--muted);margin-left:auto;">0 / 0</span>
-            </div>
-            <div id="achList" class="ach-list"></div>
-        </div>
-    </div>
     <div id="repos-overlay"></div>
     <div id="repos-panel">
         <button class="close-btn" id="closeReposBtn">✕</button>
@@ -120,7 +105,6 @@
             <a href="game/index.html" target="_blank">game</a>
             <a href="#" id="heroClickerBtn">clicker</a>
             <a href="#" id="heroShopBtn">shop</a>
-            <a href="#" id="heroSlotBtn">slot</a>
         </div>
         <div class="stats">
             <img src="https://github-readme-stats.vercel.app/api?username=tomato332&show_icons=true&theme=dark&bg_color=0d1117&border_color=30363d&text_color=c9d1d9&icon_color=58a6ff" alt="GitHub Stats" />
@@ -161,61 +145,6 @@
         <div class="shop-balance" id="shop-balance">🍅 0</div>
         <div id="shop-items"></div>
     </div>
-
-    <!-- Slot Machine Panel -->
-    <div id="slot-overlay"></div>
-    <div id="slot-panel">
-        <button class="close-btn" id="closeSlotBtn">✕</button>
-        <div class="section-title">🎰 STAR SLOT</div>
-        <div class="slot-machine">
-            <div style="font-size:.5rem;color:var(--accent2);font-family:'Press Start 2P',monospace;margin-bottom:8px;">
-                🍅 BALANCE: <span id="slotBalance">0</span>
-            </div>
-            <div class="slot-star-display" id="slotStarLevel" data-stars="0">☆☆☆☆☆☆☆☆☆☆</div>
-            <div class="slot-reels">
-                <div class="slot-reel" id="slotReel0">🍅</div>
-                <div class="slot-reel" id="slotReel1">🍅</div>
-                <div class="slot-reel" id="slotReel2">🍅</div>
-            </div>
-            <div class="slot-fate-row">
-                <span class="slot-fate-label">FATE</span>
-                <span class="slot-fate" id="slotFate">❓</span>
-            </div>
-            <div class="slot-result-text" id="slotResult">🎰 Spin to charge stars!</div>
-        </div>
-        <div style="font-size:.5rem;color:var(--muted);font-family:'Press Start 2P',monospace;margin-bottom:8px;">
-            BET: <span id="slotCurrentBet">0</span> 🍅
-        </div>
-        <div class="slot-bet-row">
-            <button class="slot-bet-btn active" data-bet="0" id="slotBet1">1%</button>
-            <button class="slot-bet-btn" data-bet="1" id="slotBet5">5%</button>
-            <button class="slot-bet-btn" data-bet="2" id="slotBet10">10%</button>
-        </div>
-        <button class="slot-spin-btn" id="slotSpinBtn">🎰 SPIN!</button>
-        <div class="slot-stats">
-            <div class="slot-stat">
-                <div class="slot-stat-label">SPINS</div>
-                <div class="slot-stat-value" id="slotTotalSpins">0</div>
-            </div>
-            <div class="slot-stat">
-                <div class="slot-stat-label">TOTAL WON</div>
-                <div class="slot-stat-value" id="slotTotalWon">0</div>
-            </div>
-            <div class="slot-stat">
-                <div class="slot-stat-label">NET</div>
-                <div class="slot-stat-value" id="slotNet">0</div>
-            </div>
-            <div class="slot-stat">
-                <div class="slot-stat-label">JACKPOTS 🎰</div>
-                <div class="slot-stat-value" id="slotJackpotCount">0</div>
-            </div>
-            <div class="slot-stat" style="grid-column:1/-1;">
-                <div class="slot-stat-label">BIGGEST WIN</div>
-                <div class="slot-stat-value" id="slotBiggestWin">0</div>
-            </div>
-        </div>
-    </div>
-    <div id="slotJackpotFlash"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/codemirror.min.js"></script>
