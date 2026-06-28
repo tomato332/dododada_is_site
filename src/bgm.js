@@ -15,6 +15,12 @@ let audioEl = null;
 let synthGain = null;
 let audioGain = null;
 
+// ── 녹음 ──
+let mediaRecorder = null;
+let recorderChunks = [];
+let isRecording = false;
+let mediaStreamDest = null;
+
 // ── 비트 콜백 시스템 ──
 const beatCallbacks = [];
 // ── 트랙 변경 콜백 ──
@@ -387,6 +393,14 @@ function getCtx() {
 }
 
 function stopAll() {
+    // 녹음 정리
+    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+        mediaRecorder.stop();
+    }
+    mediaRecorder = null;
+    recorderChunks = [];
+    isRecording = false;
+    mediaStreamDest = null;
     // 신스 정리
     if (beatInterval) { clearInterval(beatInterval); beatInterval = null; }
     if (synthGain) { try { synthGain.disconnect(); } catch {} synthGain = null; }
@@ -550,6 +564,82 @@ export function getCurrentTrack() {
     return currentTrack;
 }
 
+// ════════════════════════════════════════
+// 녹음
+// ════════════════════════════════════════
+function startRecording() {
+    const ctx = getCtx();
+    if (!ctx || !isPlaying) return;
+
+    mediaStreamDest = ctx.createMediaStreamDestination();
+
+    if (synthGain) synthGain.connect(mediaStreamDest);
+    if (audioGain) audioGain.connect(mediaStreamDest);
+
+    recorderChunks = [];
+    const mime = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
+        ? 'audio/webm;codecs=opus'
+        : 'audio/webm';
+    mediaRecorder = new MediaRecorder(mediaStreamDest.stream, { mimeType: mime });
+
+    mediaRecorder.ondataavailable = e => {
+        if (e.data.size > 0) recorderChunks.push(e.data);
+    };
+
+    mediaRecorder.onstop = () => {
+        if (recorderChunks.length === 0) return;
+        const blob = new Blob(recorderChunks, { type: mediaRecorder.mimeType });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        const trackName = (TRACKS[currentTrack]?.name || 'recording')
+            .replace(/[^\w가-힣]/g, '_');
+        const dateStr = new Date().toISOString().slice(0, 19).replace(/[:-]/g, '');
+        a.download = `tomato_${trackName}_${dateStr}.webm`;
+        a.click();
+        URL.revokeObjectURL(url);
+
+        // MediaStreamDest 연결 해제
+        if (synthGain && mediaStreamDest) {
+            try { synthGain.disconnect(mediaStreamDest); } catch {}
+        }
+        if (audioGain && mediaStreamDest) {
+            try { audioGain.disconnect(mediaStreamDest); } catch {}
+        }
+        mediaStreamDest = null;
+        mediaRecorder = null;
+        isRecording = false;
+        updateUI();
+    };
+
+    mediaRecorder.start();
+    isRecording = true;
+    updateUI();
+}
+
+function stopRecording() {
+    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+        mediaRecorder.stop();
+    }
+    isRecording = false;
+    updateUI();
+}
+
+export function toggleRecording() {
+    if (isRecording) {
+        stopRecording();
+    } else {
+        startRecording();
+    }
+    playTick('click');
+}
+
+export function isRecActive() {
+    return isRecording;
+}
+
+// ════════════════════════════════════════
+
 export function setTrack(index) {
     if (index < 0 || index >= TRACKS.length) return;
     if (isPlaying) {
@@ -581,6 +671,14 @@ function updateUI() {
     if (muteBtn) {
         muteBtn.textContent = isMuted ? '🔇' : '🔊';
         muteBtn.title = isMuted ? 'Unmute' : 'Mute';
+    }
+
+    // 녹음 버튼
+    const recBtn = document.getElementById('bgmRecBtn');
+    if (recBtn) {
+        recBtn.textContent = isRecording ? '⏹' : '⏺';
+        recBtn.classList.toggle('recording', isRecording);
+        recBtn.title = isRecording ? 'Stop recording' : 'Record BGM';
     }
 
     // volume slider
@@ -638,6 +736,14 @@ export function initBgm() {
         playTick('click');
     };
 
+    // ── 녹음 버튼 ──
+    const recBtn = document.getElementById('bgmRecBtn');
+    if (recBtn) {
+        recBtn.onclick = () => {
+            toggleRecording();
+        };
+    }
+
     // ── 볼륨 슬라이더 ──
     const volSlider = document.getElementById('bgmVolume');
     volSlider.addEventListener('input', () => {
@@ -654,5 +760,20 @@ export function initBgm() {
 
     const saved = localStorage.getItem(SAVE_KEY);
     if (saved === 'muted') { isMuted = true; updateUI(); }
-    else if (saved === 'playing') { toggleBgm(); }
+    else if (saved === 'playing') {
+        // 제스처가 아직 없으면 첫 번째 사용자 입력까지 재생 연기
+        if (getAudioCtx()) {
+            toggleBgm();
+        } else {
+            const deferPlay = () => {
+                toggleBgm();
+                document.removeEventListener('click', deferPlay);
+                document.removeEventListener('keydown', deferPlay);
+                document.removeEventListener('touchstart', deferPlay);
+            };
+            document.addEventListener('click', deferPlay, { once: true });
+            document.addEventListener('keydown', deferPlay, { once: true });
+            document.addEventListener('touchstart', deferPlay, { once: true });
+        }
+    }
 }
