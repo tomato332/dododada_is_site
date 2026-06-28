@@ -1,6 +1,7 @@
 // bgm.js — 하이브리드: 공개 lofi 라디오 스트림 + WebAudio 신디사이저
 import { playTick } from './sound.js';
 import { getAudioCtx } from './sound.js';
+import { updateContext } from './achievements.js';
 
 let isPlaying = false;
 let isMuted = false;
@@ -415,6 +416,7 @@ function startSynth() {
     beatInterval = setInterval(() => {
         scheduleSynthBeat();
     }, 6000);
+    updateContext({ bgmPlayed: true });
 }
 
 function startRadio(url) {

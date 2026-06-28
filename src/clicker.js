@@ -80,6 +80,7 @@ function startAuto() {
 
 export function initClicker() {
     state = loadState();
+    window.__clickerState = state;
 
     const tomato = document.getElementById('clicker-tomato');
     const panel = document.getElementById('clicker-panel');

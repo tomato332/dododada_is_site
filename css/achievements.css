@@ -1,0 +1,144 @@
+/* achievements.css — 🏆 도전과제 패널 */
+.ach-panel {
+    position: fixed;
+    top: 48px; left: 50%; transform: translateX(-50%);
+    z-index: 7;
+    width: min(360px, calc(100vw - 32px));
+    background: var(--bg2);
+    border: 2px solid var(--border);
+    border-top: none;
+    padding: 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height .3s ease, padding .3s ease, border-color .3s;
+    box-shadow: 0 4px 0 var(--shadow);
+    margin-top: 8px;
+}
+.ach-panel.open {
+    max-height: 420px;
+    padding: 14px 18px 16px;
+    border-color: var(--accent3);
+}
+
+.ach-panel-inner {
+    display: flex; flex-direction: column; gap: 10px;
+}
+
+.ach-panel-header {
+    display: flex; align-items: center; gap: 8px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--border);
+}
+
+.ach-list {
+    display: flex; flex-direction: column; gap: 6px;
+    overflow-y: auto;
+    max-height: 320px;
+}
+
+.ach-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 6px 8px;
+    border: 1px solid var(--border);
+    transition: all .15s;
+}
+.ach-item.ach-unlocked {
+    border-color: var(--accent3);
+    background: rgba(187,154,247,.06);
+}
+.ach-item.ach-locked {
+    opacity: .5;
+}
+
+.ach-icon {
+    font-size: 1.2rem;
+    min-width: 28px;
+    text-align: center;
+}
+
+.ach-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.ach-name {
+    font-family: 'Press Start 2P', monospace;
+    font-size: .45rem;
+    color: var(--text);
+    margin-bottom: 2px;
+}
+
+.ach-desc {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: .4rem;
+    color: var(--muted);
+}
+
+.ach-rare-badge {
+    display: inline-block;
+    font-size: .35rem;
+    color: #ffd700;
+    text-shadow: 0 0 6px rgba(255,215,0,.5);
+    margin-left: 4px;
+    letter-spacing: 1px;
+}
+
+.ach-item.ach-unlocked .ach-rare-badge {
+    animation: rareGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes rareGlow {
+    from { text-shadow: 0 0 6px rgba(255,215,0,.5); }
+    to { text-shadow: 0 0 14px rgba(255,215,0,.9), 0 0 24px rgba(255,215,0,.3); }
+}
+
+.ach-check {
+    font-size: .9rem;
+    color: var(--accent3);
+    text-shadow: 0 0 6px rgba(187,154,247,.5);
+}
+
+/* ── 토스트 알림 ── */
+.ach-toast {
+    position: fixed;
+    top: 60px; right: 20px;
+    z-index: 9999;
+    display: flex; align-items: center; gap: 10px;
+    background: var(--bg2);
+    border: 2px solid var(--accent3);
+    padding: 12px 16px;
+    box-shadow: 0 4px 12px rgba(0,0,0,.4);
+    max-width: 320px;
+    transform: translateX(120%);
+    transition: transform .3s cubic-bezier(.4,0,.2,1);
+}
+.ach-toast.show {
+    transform: translateX(0);
+}
+
+.ach-toast-icon {
+    font-size: 2rem;
+}
+
+.ach-toast-body {
+    display: flex; flex-direction: column; gap: 2px;
+}
+
+.ach-toast-title {
+    font-family: 'Press Start 2P', monospace;
+    font-size: .4rem;
+    color: var(--accent3);
+    text-shadow: 0 0 8px rgba(187,154,247,.5);
+}
+
+.ach-toast-name {
+    font-family: 'Press Start 2P', monospace;
+    font-size: .5rem;
+    color: var(--text);
+}
+
+.ach-toast-desc {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: .4rem;
+    color: var(--muted);
+}

@@ -2,6 +2,7 @@
 import { playTick } from './sound.js';
 import { getAudioCtx } from './sound.js';
 import { isBgmPlaying, setTrack, toggleBgm } from './bgm.js';
+import { updateContext, checkAchievements } from './achievements.js';
 
 const FOCUS_TIME = 25 * 60; // 25분
 const BREAK_TIME = 5 * 60;  // 5분
@@ -51,6 +52,7 @@ function onComplete() {
 
     if (mode === 'focus') {
         sessionCount++;
+        updateContext({ sessions: sessionCount });
         // 집중 완료 → 휴식 모드
         mode = 'break';
         remaining = BREAK_TIME;

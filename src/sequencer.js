@@ -1,5 +1,6 @@
 // sequencer.js — 실시간 스텝 시퀀서 UI (편집 가능)
 import { onBeat, onTrackChange, getUserPattern, togglePatternCell, resetPattern, getDisplayBeat, isSequencerTrack, saveSlot, loadSlot, deleteSlot, getSlots, copyPatternToClipboard, loadPatternFromCode } from './bgm.js';
+import { updateContext } from './achievements.js';
 
 const ROWS = [
     { id: 'kick',  label: 'KICK' },
@@ -86,6 +87,7 @@ function buildGrid() {
             // 클릭 토글
             cell.addEventListener('click', () => {
                 togglePatternCell(ri, s);
+                updateContext({ patternEdited: true });
                 render();
             });
             rowEl.appendChild(cell);
@@ -155,6 +157,8 @@ export function initSequencer() {
             const name = prompt('Save pattern as:');
             if (name && name.trim()) {
                 saveSlot(name.trim());
+                const slots = getSlots();
+                updateContext({ patternSaved: true, patternCount: Object.keys(slots).length });
                 refreshSlots();
             }
         };
