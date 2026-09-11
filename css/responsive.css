@@ -1,22 +1,121 @@
 /* responsive.css — 모바일 대응 */
-@media (max-width: 600px) {
-    .hero .avatar { width: 72px; height: 72px; }
-    .hero .name { font-size: .8rem; }
-    .hero-links a { font-size: .65rem; padding: 4px 12px; }
-    .hero .stats img { max-width: 100%; }
-    .header { padding: 6px 12px; }
+@media (max-width: 768px) {
+    /* ── 헤더 ── */
+    .header {
+        padding: 6px 10px;
+        gap: 6px;
+        max-height: none;
+        flex-wrap: wrap;
+        justify-content: space-between;
+    }
+    .header .avatar { width: 20px; height: 20px; }
     .header .name { font-size: .45rem; }
-    .header-toggle { font-size: .5rem; padding: 3px 8px; }
-    .header-collapse { font-size: .4rem; padding: 1px 6px; }
-    .theme-btn { width: 32px; height: 32px; font-size: .8rem; top: 10px; right: 12px; }
-    #repos-panel { top: 0; left: 0; transform: none; width: 100%; height: 100%; max-height: 100%; border-radius: 0; padding: 16px; box-shadow: none; }
-    #clicker-panel { top: 0; left: 0; transform: none; width: 100%; height: 100%; max-height: 100%; border-radius: 0; padding: 16px; box-shadow: none; }
-    #shop-panel { top: 0; left: 0; transform: none; width: 100%; height: 100%; max-height: 100%; border-radius: 0; padding: 16px; box-shadow: none; }
+    .header-links {
+        display: none; /* 상단 네비 링크는 모바일 화면에서 히어로 영역 버튼 활용 */
+    }
+    .header-bgm {
+        gap: 3px;
+    }
+    .header-bgm-btn {
+        padding: 3px 5px;
+        font-size: .75rem;
+    }
+    .clock-digits {
+        font-size: .35rem;
+        padding: 2px 4px;
+        letter-spacing: 1px;
+    }
+    .theme-btn, #headerThemeBtn {
+        width: 28px;
+        height: 28px;
+        font-size: .75rem;
+    }
+    .header-toggle {
+        font-size: .45rem;
+        padding: 3px 6px;
+    }
+    .header-collapse {
+        font-size: .4rem;
+        padding: 1px 5px;
+    }
+
+    /* ── 히어로 영역 ── */
+    .hero {
+        padding: 30px 16px 50px;
+        gap: 16px;
+        min-height: calc(100vh - 50px);
+    }
+    .hero .avatar { width: 68px; height: 68px; }
+    .hero .name { font-size: .8rem; text-align: center; line-height: 1.4; }
+    .hero-links {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px;
+        max-width: 100%;
+    }
+    .hero-links a {
+        font-size: .65rem;
+        padding: 6px 12px;
+    }
+    .hero .stats {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+    }
+    .hero .stats img {
+        max-width: 100%;
+        height: auto;
+    }
+
+    /* ── 공통 모달/패널 ── */
+    #repos-panel,
+    #clicker-panel,
+    #shop-panel,
+    #todo-panel {
+        top: 0; left: 0;
+        transform: none;
+        width: 100%;
+        height: 100%;
+        max-height: 100%;
+        border: none;
+        border-radius: 0;
+        padding: 18px 14px;
+        box-shadow: none;
+        box-sizing: border-box;
+    }
+
+    /* ── 캘린더 & Todo 모달 분기 ── */
+    .tc-container {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    .cal-title { font-size: .55rem; }
+    .cal-nav-btn { padding: 4px 6px; font-size: .55rem; }
+    .cal-day-name { font-size: .4rem; }
+    .cal-cell { font-size: .65rem; }
+
+    /* ── BGM / Pomodoro 패널 ── */
+    .bgm-player {
+        width: calc(100vw - 20px);
+    }
+    .bgm-player.open {
+        padding: 10px 12px;
+    }
+    .pomodoro-player {
+        width: calc(100vw - 20px);
+    }
+    .pomodoro-player.open {
+        padding: 10px 12px;
+    }
+    #bgmSelect { max-width: 100px; font-size: .55rem; padding: 2px 4px; }
+    .seq-step { width: 14px; height: 14px; }
+
+    /* ── 기타 ── */
     #cursor-glow { display: none; }
-    #bgmSelect { max-width: 90px; font-size: .45rem; padding: 2px 4px; }
     .repo { padding: 10px 12px; }
     .repo-name { font-size: .45rem; }
-    .section-title { font-size: .45rem; }
+    .section-title { font-size: .5rem; }
     .shop-item { flex-wrap: wrap; }
     .shop-item-btn { min-width: 100%; margin-top: 6px; }
 }
