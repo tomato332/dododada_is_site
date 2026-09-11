@@ -1,0 +1,203 @@
+/* todo-calendar.css — 📋 Todo & 📅 Calendar 모달 패널 */
+#todo-overlay {
+    display: none; position: fixed; inset: 0; z-index: 30;
+    background: rgba(0,0,0,.6);
+}
+#todo-overlay.show { display: block; }
+
+#todo-panel {
+    position: fixed; top: 56px; left: 50%; transform: translateX(-50%);
+    z-index: 31;
+    width: min(680px, calc(100vw - 32px));
+    max-height: calc(100vh - 80px);
+    overflow-y: auto;
+    background: var(--bg2);
+    border: 2px solid var(--border);
+    padding: 20px;
+    display: none;
+    box-shadow: 6px 6px 0 var(--shadow);
+}
+#todo-panel.show { display: block; }
+#todo-panel::-webkit-scrollbar { width: 6px; }
+#todo-panel::-webkit-scrollbar-thumb { background: var(--border); }
+
+#todo-panel .close-btn {
+    float: right; background: none; border: 2px solid var(--muted);
+    color: var(--muted); cursor: pointer;
+    width: 28px; height: 28px;
+    font-size: .8rem; line-height: 1;
+    transition: all .15s;
+}
+#todo-panel .close-btn:hover { border-color: var(--danger); color: var(--danger); }
+
+.tc-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-top: 10px;
+}
+
+@media (max-width: 600px) {
+    .tc-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ── Calendar Side ── */
+.cal-section {
+    display: flex; flex-direction: column; gap: 10px;
+}
+.cal-header {
+    display: flex; align-items: center; justify-content: space-between;
+}
+.cal-nav-group {
+    display: flex; gap: 4px;
+}
+.cal-title {
+    font-family: 'Press Start 2P', monospace;
+    font-size: .6rem; color: var(--accent2);
+}
+.cal-nav-btn {
+    background: none; border: 2px solid var(--border);
+    color: var(--text); cursor: pointer;
+    padding: 4px 8px; font-size: .65rem;
+    font-family: 'Press Start 2P', monospace;
+    transition: all .15s;
+}
+.cal-nav-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+.cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    text-align: center;
+    font-size: .75rem;
+}
+.cal-day-name {
+    font-family: 'Press Start 2P', monospace;
+    font-size: .45rem;
+    color: var(--muted);
+    padding: 6px 0;
+}
+.cal-cell {
+    aspect-ratio: 1;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    cursor: pointer;
+    position: relative;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: .75rem;
+    transition: all .15s;
+}
+.cal-cell:hover {
+    border-color: var(--accent2);
+}
+.cal-cell.empty {
+    background: transparent;
+    border: none;
+    cursor: default;
+}
+.cal-cell.today {
+    border-color: var(--accent);
+    color: var(--accent);
+    font-weight: bold;
+}
+.cal-cell.selected {
+    background: var(--accent);
+    color: var(--bg);
+    border-color: var(--accent);
+    font-weight: bold;
+}
+.cal-dot {
+    position: absolute;
+    bottom: 2px;
+    width: 4px; height: 4px;
+    background: var(--accent2);
+    border-radius: 50%;
+}
+.cal-cell.selected .cal-dot {
+    background: var(--bg);
+}
+
+/* ── Todo Side ── */
+.todo-section {
+    display: flex; flex-direction: column; gap: 10px;
+}
+.todo-date-title {
+    font-family: 'Press Start 2P', monospace;
+    font-size: .55rem; color: var(--accent);
+    letter-spacing: 1px;
+}
+.todo-input-wrap {
+    display: flex; gap: 6px;
+}
+.todo-input {
+    flex: 1;
+    background: var(--bg);
+    border: 2px solid var(--border);
+    color: var(--text);
+    padding: 8px 10px;
+    font-size: .75rem;
+    font-family: 'IBM Plex Mono', monospace;
+    outline: none;
+}
+.todo-input:focus { border-color: var(--accent2); }
+.todo-add-btn {
+    background: none; border: 2px solid var(--accent);
+    color: var(--accent); cursor: pointer;
+    padding: 8px 12px; font-size: .65rem;
+    font-family: 'Press Start 2P', monospace;
+    transition: all .15s;
+}
+.todo-add-btn:hover {
+    background: var(--accent); color: var(--bg);
+}
+
+.todo-list {
+    display: flex; flex-direction: column; gap: 6px;
+    max-height: 240px; overflow-y: auto;
+    padding-right: 4px;
+}
+.todo-list::-webkit-scrollbar { width: 4px; }
+.todo-list::-webkit-scrollbar-thumb { background: var(--border); }
+
+.todo-item {
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    padding: 6px 10px;
+    gap: 8px;
+    font-size: .75rem;
+}
+.todo-item.done .todo-text {
+    text-decoration: line-through;
+    color: var(--muted);
+}
+.todo-item-left {
+    display: flex; align-items: center; gap: 8px;
+    flex: 1; overflow: hidden;
+}
+.todo-check {
+    cursor: pointer;
+    accent-color: var(--accent);
+}
+.todo-text {
+    word-break: break-all;
+    line-height: 1.4;
+}
+.todo-del-btn {
+    background: none; border: none;
+    color: var(--muted); cursor: pointer;
+    font-size: .75rem;
+    padding: 2px 4px;
+    transition: color .15s;
+}
+.todo-del-btn:hover { color: var(--danger); }
+
+.todo-empty {
+    text-align: center; color: var(--muted);
+    font-size: .7rem; padding: 20px 0;
+    font-style: italic;
+}

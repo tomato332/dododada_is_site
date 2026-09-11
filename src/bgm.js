@@ -617,6 +617,10 @@ export function initBgm() {
     bgmBtn.onclick = e => {
         e.preventDefault();
         playerOpen = !playerOpen;
+        if (playerOpen) {
+            const pomo = document.getElementById('pomodoro-player');
+            if (pomo) pomo.classList.remove('open');
+        }
         player.classList.toggle('open', playerOpen);
         playTick('click');
     };

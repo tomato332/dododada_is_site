@@ -9,6 +9,8 @@ import { initBgm } from './bgm.js';
 import { initClock } from './clock.js';
 import { initSequencer } from './sequencer.js';
 import { initPomodoro } from './pomodoro.js';
+import { initTodoCalendar } from './todo-calendar.js';
+import { initWeather } from './weather.js';
 
 // 전역 노출 (inline onclick 대응)
 window.toggleTheme = function() {
@@ -36,6 +38,8 @@ initShop();
 initBgm();
 initSequencer();
 initPomodoro();
+initTodoCalendar();
+initWeather();
 initClock();
 
 // ── 헤더 접기 ──

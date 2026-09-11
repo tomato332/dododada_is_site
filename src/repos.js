@@ -42,7 +42,7 @@ function updateProfileUI(username) {
     // GitHub Stats 이미지 업데이트
     const statsImg = document.querySelector('.stats img');
     if (statsImg) {
-        statsImg.src = `https://github-readme-stats.vercel.app/api?username=${username}&show_icons=true&theme=dark&bg_color=0d1117&border_color=30363d&text_color=c9d1d9&icon_color=58a6ff`;
+        statsImg.src = `https://github-readme-stats-anuraghazra1.vercel.app/api?username=${username}&show_icons=true&theme=dark&bg_color=0d1117&border_color=30363d&text_color=c9d1d9&icon_color=58a6ff`;
     }
 }
 

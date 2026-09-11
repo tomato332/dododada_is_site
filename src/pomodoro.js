@@ -144,6 +144,10 @@ export function initPomodoro() {
         pomodoroBtn.onclick = e => {
             e.preventDefault();
             playerOpen = !playerOpen;
+            if (playerOpen) {
+                const bgm = document.getElementById('bgm-player');
+                if (bgm) bgm.classList.remove('open');
+            }
             player.classList.toggle('open', playerOpen);
             playTick('click');
         };
