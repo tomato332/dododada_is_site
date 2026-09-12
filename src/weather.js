@@ -299,15 +299,15 @@ function updateUI() {
         if (weatherMode === 'rain') {
             weatherBtn.textContent = '🌧';
             weatherBtn.classList.add('active');
-            weatherBtn.title = 'Weather: Rain (Click for Snow)';
+            weatherBtn.setAttribute('data-tip', 'Rain (Click for Snow)');
         } else if (weatherMode === 'snow') {
             weatherBtn.textContent = '❄️';
             weatherBtn.classList.add('active');
-            weatherBtn.title = 'Weather: Snow (Click to Turn Off)';
+            weatherBtn.setAttribute('data-tip', 'Snow (Click to Turn Off)');
         } else {
             weatherBtn.textContent = '☀️';
             weatherBtn.classList.remove('active');
-            weatherBtn.title = 'Weather: Off (Click for Rain)';
+            weatherBtn.setAttribute('data-tip', 'Weather (Click for Rain)');
         }
     }
 
@@ -316,7 +316,7 @@ function updateUI() {
         thunderBtn.style.display = weatherMode === 'rain' ? 'inline-block' : 'none';
         thunderBtn.classList.toggle('active', thunderEnabled);
         thunderBtn.textContent = thunderEnabled ? '⚡' : '🌩';
-        thunderBtn.title = thunderEnabled ? 'Thunder: ON (Click to Mute)' : 'Thunder: OFF (Click to Enable)';
+        thunderBtn.setAttribute('data-tip', thunderEnabled ? 'Thunder: ON' : 'Thunder: OFF');
     }
 }
 

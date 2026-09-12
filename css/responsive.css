@@ -97,13 +97,17 @@
 
     /* ── BGM / Pomodoro 패널 ── */
     .bgm-player {
+        top: 40px;
         width: calc(100vw - 20px);
+        padding: 0 12px;
     }
     .bgm-player.open {
         padding: 10px 12px;
     }
     .pomodoro-player {
+        top: 40px;
         width: calc(100vw - 20px);
+        padding: 0 12px;
     }
     .pomodoro-player.open {
         padding: 10px 12px;

@@ -1,0 +1,46 @@
+/* tooltip.css — 레트로 픽셀 스타일 툴팁 */
+[data-tip] {
+    position: relative;
+}
+
+[data-tip]::after {
+    content: attr(data-tip);
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%) translateY(4px);
+    background: var(--bg2);
+    color: var(--text);
+    border: 2px solid var(--border);
+    padding: 5px 8px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: .45rem;
+    line-height: 1.4;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .15s ease, transform .15s ease, visibility .15s;
+    box-shadow: 3px 3px 0 var(--shadow);
+    z-index: 1000;
+}
+
+/* 아래쪽으로 표시해야 하는 툴팁 (헤더 영역 등) */
+[data-tip-pos="bottom"]::after {
+    bottom: auto;
+    top: calc(100% + 10px);
+    transform: translateX(-50%) translateY(-4px);
+}
+
+[data-tip]:hover::after {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+}
+
+/* 터치 기기에서는 툴팁 숨김 */
+@media (hover: none) {
+    [data-tip]::after {
+        display: none;
+    }
+}

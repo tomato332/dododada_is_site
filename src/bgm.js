@@ -388,7 +388,16 @@ function getCtx() {
 function stopAll() {
     // 신스 정리
     if (beatInterval) { clearInterval(beatInterval); beatInterval = null; }
-    if (synthGain) { try { synthGain.disconnect(); } catch {} synthGain = null; }
+    if (synthGain) {
+        const g = synthGain;
+        synthGain = null;
+        try {
+            const ctx = getCtx();
+            g.gain.cancelScheduledValues(ctx.currentTime);
+            g.gain.setValueAtTime(0, ctx.currentTime);
+            g.disconnect();
+        } catch {}
+    }
     // 라디오 정리
     if (audioEl) {
         audioEl.pause();
@@ -396,7 +405,16 @@ function stopAll() {
         audioEl.load();
         audioEl = null;
     }
-    if (audioGain) { try { audioGain.disconnect(); } catch {} audioGain = null; }
+    if (audioGain) {
+        const ag = audioGain;
+        audioGain = null;
+        try {
+            const ctx = getCtx();
+            ag.gain.cancelScheduledValues(ctx.currentTime);
+            ag.gain.setValueAtTime(0, ctx.currentTime);
+            ag.disconnect();
+        } catch {}
+    }
     if (gainNode) { try { gainNode.disconnect(); } catch {} gainNode = null; }
     isPlaying = false;
     displayBeat = 0;
@@ -569,7 +587,6 @@ function updateUI() {
         if (!isPlaying) btn.textContent = '🎵';
         else if (isMuted) btn.textContent = '🔇';
         else btn.textContent = '🎶';
-        btn.title = TRACKS[currentTrack].name;
     }
     const sel = document.getElementById('bgmSelect');
     if (sel) sel.value = currentTrack;
@@ -578,7 +595,6 @@ function updateUI() {
     const muteBtn = document.getElementById('bgmMuteBtn');
     if (muteBtn) {
         muteBtn.textContent = isMuted ? '🔇' : '🔊';
-        muteBtn.title = isMuted ? 'Unmute' : 'Mute';
     }
 
     // volume slider

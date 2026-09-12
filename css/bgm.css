@@ -5,18 +5,23 @@
     z-index: 9;
     width: min(420px, calc(100vw - 32px));
     background: var(--bg2);
-    border: 2px solid var(--border);
+    border: 2px solid transparent;
     border-top: none;
-    padding: 0;
+    padding: 0 18px;
     max-height: 0;
     overflow: hidden;
-    transition: max-height .3s ease, padding .3s ease, border-color .3s;
-    box-shadow: 0 4px 0 var(--shadow);
+    visibility: hidden;
+    pointer-events: none;
+    transition: max-height .3s ease, padding .3s ease, border-color .3s, visibility .3s;
+    box-shadow: none;
 }
 .bgm-player.open {
     max-height: 420px;
     padding: 14px 18px 16px;
     border-color: var(--accent2);
+    visibility: visible;
+    pointer-events: auto;
+    box-shadow: 0 4px 0 var(--shadow);
 }
 
 .bgm-player-inner {
