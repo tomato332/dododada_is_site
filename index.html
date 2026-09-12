@@ -164,6 +164,16 @@
                     <button class="cal-nav-btn" id="calPrevBtn" data-tip="Prev Month">◀</button>
                     <span class="cal-title" id="calTitle"></span>
                     <div class="cal-nav-group">
+                        <select id="calCountrySelect" class="cal-country-select" data-tip="Select Country">
+                            <option value="KR">🇰🇷 KR</option>
+                            <option value="US">🇺🇸 US</option>
+                            <option value="JP">🇯🇵 JP</option>
+                            <option value="GB">🇬🇧 GB</option>
+                            <option value="DE">🇩🇪 DE</option>
+                            <option value="FR">🇫🇷 FR</option>
+                            <option value="CA">🇨🇦 CA</option>
+                            <option value="AU">🇦🇺 AU</option>
+                        </select>
                         <button class="cal-nav-btn" id="calTodayBtn" data-tip="Jump to Today">TODAY</button>
                         <button class="cal-nav-btn" id="calNextBtn" data-tip="Next Month">▶</button>
                     </div>
@@ -182,7 +192,10 @@
 
             <!-- Todo Section -->
             <div class="todo-section">
-                <div class="todo-date-title" id="todoDateTitle">TODO</div>
+                <div class="todo-header-wrap">
+                    <div class="todo-date-title" id="todoDateTitle">TODO</div>
+                    <div class="todo-holiday-badge" id="todoHolidayBadge" style="display:none;"></div>
+                </div>
                 <div class="todo-input-wrap">
                     <input type="text" id="todoInput" class="todo-input" placeholder="New task..." />
                     <button id="todoAddBtn" class="todo-add-btn" data-tip="Add Task">+</button>

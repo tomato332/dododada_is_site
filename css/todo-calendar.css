@@ -51,7 +51,22 @@
     display: flex; align-items: center; justify-content: space-between;
 }
 .cal-nav-group {
-    display: flex; gap: 4px;
+    display: flex; align-items: center; gap: 4px;
+}
+.cal-country-select {
+    background: var(--bg);
+    border: 2px solid var(--border);
+    color: var(--text);
+    padding: 3px 4px;
+    font-size: .55rem;
+    font-family: 'Press Start 2P', monospace;
+    outline: none;
+    cursor: pointer;
+    transition: border-color .15s;
+}
+.cal-country-select:focus,
+.cal-country-select:hover {
+    border-color: var(--accent2);
 }
 .cal-title {
     font-family: 'Press Start 2P', monospace;
@@ -104,11 +119,32 @@
     color: var(--accent);
     font-weight: bold;
 }
+.cal-cell.holiday {
+    color: var(--danger);
+    font-weight: bold;
+}
 .cal-cell.selected {
     background: var(--accent);
     color: var(--bg);
     border-color: var(--accent);
     font-weight: bold;
+}
+.cal-cell.selected.holiday {
+    background: var(--danger);
+    color: #fff;
+    border-color: var(--danger);
+}
+.cal-holiday-dot {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    width: 4px;
+    height: 4px;
+    background: var(--danger);
+    border-radius: 50%;
+}
+.cal-cell.selected .cal-holiday-dot {
+    background: #fff;
 }
 .cal-dot {
     position: absolute;
@@ -125,10 +161,23 @@
 .todo-section {
     display: flex; flex-direction: column; gap: 10px;
 }
+.todo-header-wrap {
+    display: flex; flex-direction: column; gap: 4px;
+}
 .todo-date-title {
     font-family: 'Press Start 2P', monospace;
     font-size: .55rem; color: var(--accent);
     letter-spacing: 1px;
+}
+.todo-holiday-badge {
+    font-size: .65rem;
+    color: var(--danger);
+    background: rgba(247, 118, 142, 0.12);
+    border: 1px solid var(--danger);
+    padding: 3px 6px;
+    font-family: 'IBM Plex Mono', monospace;
+    display: inline-block;
+    border-radius: 2px;
 }
 .todo-input-wrap {
     display: flex; gap: 6px;

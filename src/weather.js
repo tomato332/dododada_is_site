@@ -15,6 +15,8 @@ let animationFrameId = null;
 
 let particles = [];
 let splashes = [];
+let lightningBolts = []; // 하늘에서 지상으로 꽂히는 낙뢰 줄기들
+let groundStrikes = []; // 낙뢰가 바닥에 부딪혔을 때 일어나는 스파크/충격파
 let snowAccum = []; // 바닥 눈 쌓임 높이 배열 (컬럼별)
 const ACCUM_STEP = 6; // 눈 쌓임 해상도 (px)
 let lightningAlpha = 0;
@@ -98,13 +100,84 @@ function triggerThunderSound(audioCtx) {
     } catch {}
 }
 
+function createLightningBolt(startX, startY, endX, endY) {
+    const segments = [];
+    const points = [];
+    const steps = 18 + Math.floor(Math.random() * 8);
+
+    points.push({ x: startX, y: startY });
+    for (let i = 1; i < steps; i++) {
+        const progress = i / steps;
+        const curX = startX + (endX - startX) * progress + (Math.random() * 60 - 30);
+        const curY = startY + (endY - startY) * progress + (Math.random() * 20 - 10);
+        points.push({ x: curX, y: curY });
+    }
+    points.push({ x: endX, y: endY });
+
+    // 지선(branch) 생성
+    const branches = [];
+    for (let i = 2; i < points.length - 3; i++) {
+        if (Math.random() < 0.25) {
+            const bPoints = [{ x: points[i].x, y: points[i].y }];
+            const branchLen = 4 + Math.floor(Math.random() * 5);
+            let bX = points[i].x;
+            let bY = points[i].y;
+            const dir = Math.random() < 0.5 ? -1 : 1;
+            for (let j = 0; j < branchLen; j++) {
+                bX += (Math.random() * 20 + 10) * dir;
+                bY += Math.random() * 25 + 10;
+                bPoints.push({ x: bX, y: bY });
+            }
+            branches.push(bPoints);
+        }
+    }
+
+    return {
+        main: points,
+        branches,
+        alpha: 0.6,
+        decay: 0.05 + Math.random() * 0.03
+    };
+}
+
+function spawnGroundImpact(x, y) {
+    groundStrikes.push({
+        x,
+        y,
+        radius: 0,
+        maxRadius: 25 + Math.random() * 15,
+        alpha: 0.5
+    });
+    // 스파크 파편 튀김
+    for (let i = 0; i < 8; i++) {
+        splashes.push({
+            x,
+            y,
+            vx: (Math.random() * 6 - 3),
+            vy: -(3 + Math.random() * 4),
+            life: 0.6,
+            decay: 0.06 + Math.random() * 0.04,
+            isSpark: true
+        });
+    }
+}
+
 function flashLightning() {
-    if (weatherMode !== 'rain' || !thunderEnabled) return;
-    lightningAlpha = 0.85;
+    if (weatherMode !== 'rain' || !thunderEnabled || !canvas) return;
+    lightningAlpha = 0.35;
+
+    // 낙뢰(번개 줄기) 지점 계산: 하늘 상단 -> 바닥/화면 하단
+    const startX = Math.random() * canvas.width;
+    const endX = startX + (Math.random() * 200 - 100);
+    const endY = canvas.height - Math.random() * 20;
+
+    lightningBolts.push(createLightningBolt(startX, 0, endX, endY));
+    spawnGroundImpact(endX, endY);
+
     const audioCtx = getAudioCtx();
     setTimeout(() => {
         if (weatherMode === 'rain' && thunderEnabled) triggerThunderSound(audioCtx);
-    }, 200 + Math.random() * 400);
+    }, 120 + Math.random() * 250);
 }
 
 function scheduleNextThunder() {
@@ -118,6 +191,16 @@ function scheduleNextThunder() {
             scheduleNextThunder();
         }
     }, delay);
+}
+
+function drawBoltPath(c, pts) {
+    if (!pts || pts.length < 2) return;
+    c.beginPath();
+    c.moveTo(pts[0].x, pts[0].y);
+    for (let i = 1; i < pts.length; i++) {
+        c.lineTo(pts[i].x, pts[i].y);
+    }
+    c.stroke();
 }
 
 // ── 캔버스 및 파티클 ──
@@ -205,6 +288,49 @@ function drawLoop() {
         if (lightningAlpha < 0) lightningAlpha = 0;
     }
 
+    // 1-1. 낙뢰(번개 줄기 및 가지) 렌더링
+    for (let i = lightningBolts.length - 1; i >= 0; i--) {
+        const bolt = lightningBolts[i];
+        ctx.save();
+        ctx.lineJoin = 'miter';
+
+        // 외곽 푸른빛 글로우
+        ctx.strokeStyle = `rgba(140, 190, 255, ${bolt.alpha * 0.3})`;
+        ctx.lineWidth = 4;
+        drawBoltPath(ctx, bolt.main);
+        for (const b of bolt.branches) drawBoltPath(ctx, b);
+
+        // 중심 흰색 광선
+        ctx.strokeStyle = `rgba(255, 255, 255, ${bolt.alpha * 0.7})`;
+        ctx.lineWidth = 1.8;
+        drawBoltPath(ctx, bolt.main);
+        ctx.lineWidth = 1.0;
+        for (const b of bolt.branches) drawBoltPath(ctx, b);
+
+        ctx.restore();
+
+        bolt.alpha -= bolt.decay;
+        if (bolt.alpha <= 0) {
+            lightningBolts.splice(i, 1);
+        }
+    }
+
+    // 1-2. 지면 충격파 링
+    for (let i = groundStrikes.length - 1; i >= 0; i--) {
+        const gs = groundStrikes[i];
+        ctx.strokeStyle = `rgba(200, 230, 255, ${gs.alpha * 0.5})`;
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.ellipse(gs.x, gs.y, gs.radius, gs.radius * 0.35, 0, 0, Math.PI * 2);
+        ctx.stroke();
+
+        gs.radius += 2.0;
+        gs.alpha -= 0.04;
+        if (gs.alpha <= 0) {
+            groundStrikes.splice(i, 1);
+        }
+    }
+
     if (weatherMode === 'rain') {
         // 비 그리기
         ctx.lineWidth = 1.5;
@@ -227,13 +353,20 @@ function drawLoop() {
             }
         }
 
-        // 바닥 물방울 튀김 (스플래시)
+        // 바닥 물방울 및 낙뢰 스파크 튀김
         for (let i = splashes.length - 1; i >= 0; i--) {
             const s = splashes[i];
-            ctx.fillStyle = `rgba(180, 215, 255, ${s.life * 0.6})`;
-            ctx.beginPath();
-            ctx.arc(s.x, s.y, 1.2, 0, Math.PI * 2);
-            ctx.fill();
+            if (s.isSpark) {
+                ctx.fillStyle = `rgba(255, 255, 255, ${s.life})`;
+                ctx.beginPath();
+                ctx.arc(s.x, s.y, 1.8, 0, Math.PI * 2);
+                ctx.fill();
+            } else {
+                ctx.fillStyle = `rgba(180, 215, 255, ${s.life * 0.6})`;
+                ctx.beginPath();
+                ctx.arc(s.x, s.y, 1.2, 0, Math.PI * 2);
+                ctx.fill();
+            }
 
             s.x += s.vx;
             s.y += s.vy;

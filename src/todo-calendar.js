@@ -2,11 +2,28 @@
 import { playTick } from './sound.js';
 
 const STORAGE_KEY = 'tomato_todos';
+const COUNTRY_KEY = 'tomato_cal_country';
 
 let todos = {}; // { 'YYYY-MM-DD': [ { id, text, done } ] }
+let holidays = {}; // { 'YYYY-MM-DD': '공휴일명' }
 let currentYear = new Date().getFullYear();
 let currentMonth = new Date().getMonth(); // 0-11
 let selectedDateStr = getTodayStr();
+let currentCountry = detectDefaultCountry();
+
+function detectDefaultCountry() {
+    const saved = localStorage.getItem(COUNTRY_KEY);
+    if (saved) return saved;
+    const lang = (navigator.language || 'ko-KR').toUpperCase();
+    if (lang.includes('KR') || lang.includes('KO')) return 'KR';
+    if (lang.includes('JP') || lang.includes('JA')) return 'JP';
+    if (lang.includes('GB')) return 'GB';
+    if (lang.includes('DE')) return 'DE';
+    if (lang.includes('FR')) return 'FR';
+    if (lang.includes('CA')) return 'CA';
+    if (lang.includes('AU')) return 'AU';
+    return 'US';
+}
 
 function getTodayStr() {
     const d = new Date();
@@ -29,6 +46,36 @@ function saveTodos() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(todos));
 }
 
+// ── Nager.Date API 공휴일 비동기 조회 및 캐싱 ──
+async function fetchHolidays(year, country) {
+    const cacheKey = `holidays_${country}_${year}`;
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) {
+        try {
+            holidays = JSON.parse(cached);
+            renderCalendar();
+            renderTodoList();
+            return;
+        } catch {}
+    }
+
+    try {
+        const res = await fetch(`https://date.nager.at/api/v3/PublicHolidays/${year}/${country}`);
+        if (!res.ok) throw new Error('API Error');
+        const data = await res.json();
+        const map = {};
+        data.forEach(h => {
+            map[h.date] = h.localName || h.name;
+        });
+        holidays = map;
+        localStorage.setItem(cacheKey, JSON.stringify(map));
+        renderCalendar();
+        renderTodoList();
+    } catch {
+        holidays = {};
+    }
+}
+
 export function initTodoCalendar() {
     loadTodos();
 
@@ -37,6 +84,19 @@ export function initTodoCalendar() {
     const closeBtn = document.getElementById('closeTodoBtn');
     const headerBtn = document.getElementById('headerTodoBtn');
     const heroBtn = document.getElementById('heroTodoBtn');
+    const countrySelect = document.getElementById('calCountrySelect');
+
+    if (countrySelect) {
+        countrySelect.value = currentCountry;
+        countrySelect.onchange = () => {
+            currentCountry = countrySelect.value;
+            localStorage.setItem(COUNTRY_KEY, currentCountry);
+            fetchHolidays(currentYear, currentCountry);
+            playTick('click');
+        };
+    }
+
+    fetchHolidays(currentYear, currentCountry);
 
     function openPanel() {
         if (!panel || !overlay) return;
@@ -59,31 +119,46 @@ export function initTodoCalendar() {
 
     // Calendar Navigation
     document.getElementById('calPrevBtn')?.addEventListener('click', () => {
+        const prevYear = currentYear;
         currentMonth--;
         if (currentMonth < 0) {
             currentMonth = 11;
             currentYear--;
         }
-        renderCalendar();
+        if (currentYear !== prevYear) {
+            fetchHolidays(currentYear, currentCountry);
+        } else {
+            renderCalendar();
+        }
     });
 
     document.getElementById('calTodayBtn')?.addEventListener('click', () => {
         const today = new Date();
+        const prevYear = currentYear;
         currentYear = today.getFullYear();
         currentMonth = today.getMonth();
         selectedDateStr = getTodayStr();
-        renderCalendar();
+        if (currentYear !== prevYear) {
+            fetchHolidays(currentYear, currentCountry);
+        } else {
+            renderCalendar();
+        }
         renderTodoList();
         playTick('click');
     });
 
     document.getElementById('calNextBtn')?.addEventListener('click', () => {
+        const prevYear = currentYear;
         currentMonth++;
         if (currentMonth > 11) {
             currentMonth = 0;
             currentYear++;
         }
-        renderCalendar();
+        if (currentYear !== prevYear) {
+            fetchHolidays(currentYear, currentCountry);
+        } else {
+            renderCalendar();
+        }
     });
 
     // Todo Form Add
@@ -149,6 +224,15 @@ function renderCalendar() {
         cell.className = 'cal-cell';
         cell.textContent = day;
 
+        const isHoliday = !!holidays[dateStr];
+        if (isHoliday) {
+            cell.classList.add('holiday');
+            cell.setAttribute('data-tip', holidays[dateStr]);
+            const hDot = document.createElement('span');
+            hDot.className = 'cal-holiday-dot';
+            cell.appendChild(hDot);
+        }
+
         if (dateStr === todayStr) cell.classList.add('today');
         if (dateStr === selectedDateStr) cell.classList.add('selected');
 
@@ -172,10 +256,22 @@ function renderCalendar() {
 
 function renderTodoList() {
     const titleEl = document.getElementById('todoDateTitle');
+    const badgeEl = document.getElementById('todoHolidayBadge');
     const listEl = document.getElementById('todoList');
     if (!titleEl || !listEl) return;
 
     titleEl.textContent = `TODO [${selectedDateStr}]`;
+
+    // 공휴일 배지 표시
+    if (badgeEl) {
+        if (holidays[selectedDateStr]) {
+            badgeEl.textContent = `🚩 ${holidays[selectedDateStr]}`;
+            badgeEl.style.display = 'inline-block';
+        } else {
+            badgeEl.style.display = 'none';
+        }
+    }
+
     listEl.innerHTML = '';
 
     const items = todos[selectedDateStr] || [];
