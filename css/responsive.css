@@ -110,7 +110,8 @@
         padding: 0 12px;
     }
     .pomodoro-player.open {
-        padding: 10px 12px;
+        max-height: calc(100vh - 60px);
+        padding: 12px 14px 16px;
     }
     #bgmSelect { max-width: 100px; font-size: .55rem; padding: 2px 4px; }
     .seq-step { width: 14px; height: 14px; }

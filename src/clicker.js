@@ -23,16 +23,25 @@ export function getState() {
 }
 
 export function render() {
-    document.getElementById('clicker-score').textContent = state.score.toLocaleString();
-    document.getElementById('clicker-power').textContent = `+${state.power}`;
-    document.getElementById('clicker-auto').textContent = state.auto;
-    document.getElementById('clicker-stats').textContent = `TOTAL CLICKS: ${state.totalClicks}`;
+    const scoreEl = document.getElementById('clicker-score');
+    const powerEl = document.getElementById('clicker-power');
+    const autoEl = document.getElementById('clicker-auto');
+    const statsEl = document.getElementById('clicker-stats');
     const btnPower = document.getElementById('upgrade-power');
     const btnAuto = document.getElementById('upgrade-auto');
-    btnPower.textContent = `⬆ UPGRADE POWER (${state.powerCost} 🍅)`;
-    btnPower.disabled = state.score < state.powerCost;
-    btnAuto.textContent = `⏰ AUTO CLICKER (${state.autoCost} 🍅)`;
-    btnAuto.disabled = state.score < state.autoCost;
+
+    if (scoreEl) scoreEl.textContent = state.score.toLocaleString();
+    if (powerEl) powerEl.textContent = `+${state.power}`;
+    if (autoEl) autoEl.textContent = state.auto;
+    if (statsEl) statsEl.textContent = `TOTAL CLICKS: ${state.totalClicks}`;
+    if (btnPower) {
+        btnPower.textContent = `⬆ UPGRADE POWER (${state.powerCost} 🍅)`;
+        btnPower.disabled = state.score < state.powerCost;
+    }
+    if (btnAuto) {
+        btnAuto.textContent = `⏰ AUTO CLICKER (${state.autoCost} 🍅)`;
+        btnAuto.disabled = state.score < state.autoCost;
+    }
     save();
     // 샵 잔액 실시간 동기화
     window.shopRender?.();
@@ -84,43 +93,51 @@ export function initClicker() {
     const tomato = document.getElementById('clicker-tomato');
     const panel = document.getElementById('clicker-panel');
     const overlay = document.getElementById('clicker-overlay');
+    const upPower = document.getElementById('upgrade-power');
+    const upAuto = document.getElementById('upgrade-auto');
 
-    tomato.onclick = (e) => {
-        const rect = tomato.getBoundingClientRect();
-        tomato.classList.remove('bounce');
-        void tomato.offsetWidth;
-        tomato.classList.add('bounce');
-        addScore(state.power, e.clientX || rect.left + rect.width / 2, e.clientY || rect.top + rect.height / 2);
-        render();
-    };
+    if (tomato) {
+        tomato.onclick = (e) => {
+            const rect = tomato.getBoundingClientRect();
+            tomato.classList.remove('bounce');
+            void tomato.offsetWidth;
+            tomato.classList.add('bounce');
+            addScore(state.power, e.clientX || rect.left + rect.width / 2, e.clientY || rect.top + rect.height / 2);
+            render();
+        };
+    }
 
-    document.getElementById('upgrade-power').onclick = () => {
-        if (state.score < state.powerCost) return;
-        state.score -= state.powerCost;
-        state.power++;
-        state.powerCost = Math.floor(state.powerCost * 1.35);
-        render();
-        playTick('open');
-    };
+    if (upPower) {
+        upPower.onclick = () => {
+            if (state.score < state.powerCost) return;
+            state.score -= state.powerCost;
+            state.power++;
+            state.powerCost = Math.floor(state.powerCost * 1.35);
+            render();
+            playTick('open');
+        };
+    }
 
-    document.getElementById('upgrade-auto').onclick = () => {
-        if (state.score < state.autoCost) return;
-        state.score -= state.autoCost;
-        state.auto++;
-        state.autoCost = Math.floor(state.autoCost * 1.45);
-        if (autoInterval) clearInterval(autoInterval);
-        startAuto();
-        render();
-        playTick('open');
-    };
+    if (upAuto) {
+        upAuto.onclick = () => {
+            if (state.score < state.autoCost) return;
+            state.score -= state.autoCost;
+            state.auto++;
+            state.autoCost = Math.floor(state.autoCost * 1.45);
+            if (autoInterval) clearInterval(autoInterval);
+            startAuto();
+            render();
+            playTick('open');
+        };
+    }
 
-    // 패널 열기/닫기
-    function show() { panel.classList.add('show'); overlay.classList.add('show'); }
-    function hide() { panel.classList.remove('show'); overlay.classList.remove('show'); }
-    document.getElementById('headerClickerBtn').onclick = e => { e.preventDefault(); show(); };
-    document.getElementById('heroClickerBtn').onclick = e => { e.preventDefault(); show(); };
-    document.getElementById('closeClickerBtn').onclick = hide;
-    overlay.onclick = hide;
+    // 패널 열기/닫기 (메인 페이지 모달용)
+    function show() { if (panel && overlay) { panel.classList.add('show'); overlay.classList.add('show'); } }
+    function hide() { if (panel && overlay) { panel.classList.remove('show'); overlay.classList.remove('show'); } }
+    if (document.getElementById('headerClickerBtn')) document.getElementById('headerClickerBtn').onclick = e => { e.preventDefault(); show(); };
+    if (document.getElementById('heroClickerBtn')) document.getElementById('heroClickerBtn').onclick = e => { e.preventDefault(); show(); };
+    if (document.getElementById('closeClickerBtn')) document.getElementById('closeClickerBtn').onclick = hide;
+    if (overlay) overlay.onclick = hide;
 
     startAuto();
     render();

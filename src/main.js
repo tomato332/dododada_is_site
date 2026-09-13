@@ -47,6 +47,7 @@ initClock();
     const KEY = 'header_collapsed';
     const header = document.getElementById('header');
     const btn = document.getElementById('headerCollapseBtn');
+    if (!header || !btn) return;
     const wasCollapsed = localStorage.getItem(KEY) === 'true';
 
     function setCollapsed(collapsed) {

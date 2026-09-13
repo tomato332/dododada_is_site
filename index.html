@@ -18,25 +18,36 @@
 
     <!-- Header -->
     <div class="header" id="header">
-        <img class="avatar" src="https://avatars.githubusercontent.com/tomato332" alt="" />
-        <span class="name">tomato332</span>
-        <div class="header-links">
-            <a href="https://github.com/tomato332" target="_blank">github</a>
-            <a href="game/index.html" target="_blank">game</a>
-            <a href="#" id="headerTodoBtn">todo</a>
-            <a href="#" id="headerClickerBtn">clicker</a>
-            <a href="#" id="headerShopBtn">shop</a>
+        <div class="header-left">
+            <img class="avatar" src="https://avatars.githubusercontent.com/tomato332" alt="" />
+            <span class="name">tomato332</span>
         </div>
-        <div class="header-bgm">
-            <button id="bgmBtn" class="header-bgm-btn" data-tip="BGM Player" data-tip-pos="bottom">🎵</button>
-            <button id="pomodoroBtn" class="header-bgm-btn" data-tip="Pomodoro Timer" data-tip-pos="bottom">🍅</button>
-            <button id="weatherBtn" class="header-bgm-btn" data-tip="Weather (Rain/Snow)" data-tip-pos="bottom">☀️</button>
-            <button id="thunderBtn" class="header-bgm-btn" style="display:none;" data-tip="Thunder & Lightning" data-tip-pos="bottom">🌩</button>
+        <div class="header-center">
+            <span id="headerClock"></span>
         </div>
-        <span id="headerClock"></span>
-        <button class="theme-btn" id="headerThemeBtn" onclick="toggleTheme()" data-tip="Theme Toggle" data-tip-pos="bottom" aria-label="Toggle theme">🌙</button>
-        <button class="header-toggle" id="toggleReposBtn" data-tip="GitHub Repos" data-tip-pos="bottom">▾ repos</button>
-        <button class="header-collapse" id="headerCollapseBtn" data-tip="Collapse Header" data-tip-pos="bottom">▲</button>
+        <div class="header-right">
+            <div class="theme-dropdown-wrap">
+                <button class="theme-btn" id="headerThemeBtn" onclick="toggleTheme()" data-tip="Theme & Weather" data-tip-pos="bottom" aria-label="Toggle theme">🌙</button>
+                <div class="weather-dropdown">
+                    <div class="weather-dropdown-row">
+                        <span class="weather-dropdown-label">WEATHER</span>
+                        <div style="display:flex;gap:4px;">
+                            <button class="weather-item-btn" id="weatherClearBtn" title="Clear">☀️</button>
+                            <button class="weather-item-btn" id="weatherRainBtn" title="Rain">🌧</button>
+                            <button class="weather-item-btn" id="weatherSnowBtn" title="Snow">❄️</button>
+                        </div>
+                    </div>
+                    <div class="weather-dropdown-row">
+                        <span class="weather-dropdown-label">THUNDER</span>
+                        <button class="weather-item-btn" id="weatherThunderToggleBtn">⚡ OFF</button>
+                    </div>
+                </div>
+            </div>
+            <div class="header-bgm">
+                <button id="pomodoroBtn" class="header-bgm-btn" data-tip="Timer & Todo" data-tip-pos="bottom">🍅</button>
+                <button id="bgmBtn" class="header-bgm-btn" data-tip="BGM Player" data-tip-pos="bottom">🎵</button>
+            </div>
+        </div>
     </div>
 
     <!-- BGM Player Panel -->
@@ -69,13 +80,15 @@
         </div>
     </div>
 
-    <!-- Pomodoro Timer Panel -->
+    <!-- Pomodoro & Todo/Calendar Panel -->
     <div id="pomodoro-player" class="pomodoro-player">
         <div class="pomodoro-player-inner">
             <div class="pomodoro-player-header">
                 <span class="pomodoro-player-icon">🍅</span>
-                <span class="pomodoro-player-title">POMODORO</span>
+                <span class="pomodoro-player-title">POMODORO & TODO</span>
             </div>
+            
+            <!-- Timer Section -->
             <div class="pomodoro-player-body">
                 <span class="pomodoro-mode" id="pomodoroMode">FOCUS</span>
                 <span class="pomodoro-display" id="pomodoroDisplay">25:00</span>
@@ -83,8 +96,56 @@
                     <button class="pomodoro-btn" id="pomodoroStart" data-tip="Start / Pause">▶</button>
                     <button class="pomodoro-btn" id="pomodoroReset" data-tip="Reset Timer">↺</button>
                 </div>
+                <div class="pomodoro-player-sessions" id="pomodoroSessions">SESSIONS: 0</div>
             </div>
-            <div class="pomodoro-player-sessions" id="pomodoroSessions">SESSIONS: 0</div>
+
+            <!-- Calendar & Todo Section -->
+            <div class="tc-container">
+                <!-- Calendar Section -->
+                <div class="cal-section">
+                    <div class="cal-header">
+                        <button class="cal-nav-btn" id="calPrevBtn" data-tip="Prev Month">◀</button>
+                        <span class="cal-title" id="calTitle"></span>
+                        <div class="cal-nav-group">
+                            <select id="calCountrySelect" class="cal-country-select" data-tip="Select Country">
+                                <option value="KR">🇰🇷 KR</option>
+                                <option value="US">🇺🇸 US</option>
+                                <option value="JP">🇯🇵 JP</option>
+                                <option value="GB">🇬🇧 GB</option>
+                                <option value="DE">🇩🇪 DE</option>
+                                <option value="FR">🇫🇷 FR</option>
+                                <option value="CA">🇨🇦 CA</option>
+                                <option value="AU">🇦🇺 AU</option>
+                            </select>
+                            <button class="cal-nav-btn" id="calTodayBtn" data-tip="Jump to Today">TODAY</button>
+                            <button class="cal-nav-btn" id="calNextBtn" data-tip="Next Month">▶</button>
+                        </div>
+                    </div>
+                    <div class="cal-grid">
+                        <div class="cal-day-name">SU</div>
+                        <div class="cal-day-name">MO</div>
+                        <div class="cal-day-name">TU</div>
+                        <div class="cal-day-name">WE</div>
+                        <div class="cal-day-name">TH</div>
+                        <div class="cal-day-name">FR</div>
+                        <div class="cal-day-name">SA</div>
+                    </div>
+                    <div class="cal-grid" id="calGridDays"></div>
+                </div>
+
+                <!-- Todo Section -->
+                <div class="todo-section">
+                    <div class="todo-header-wrap">
+                        <div class="todo-date-title" id="todoDateTitle">TODO</div>
+                        <div class="todo-holiday-badge" id="todoHolidayBadge" style="display:none;"></div>
+                    </div>
+                    <div class="todo-input-wrap">
+                        <input type="text" id="todoInput" class="todo-input" placeholder="New task..." />
+                        <button id="todoAddBtn" class="todo-add-btn" data-tip="Add Task">+</button>
+                    </div>
+                    <div class="todo-list" id="todoList"></div>
+                </div>
+            </div>
         </div>
     </div>
     <div id="repos-overlay"></div>
@@ -104,105 +165,30 @@
         <div class="avatar-wrap">
             <img class="avatar" src="https://avatars.githubusercontent.com/tomato332" alt="tomato332" />
         </div>
-        <div class="name">tomato332</div>
+        <div style="display:flex;align-items:center;gap:10px;">
+            <div class="name">tomato332</div>
+            <button class="header-toggle" id="toggleReposBtn" data-tip="GitHub Repos" data-tip-pos="bottom">▾ repos</button>
+        </div>
         <div class="hero-links">
             <a href="https://github.com/tomato332" target="_blank">github</a>
-            <a href="game/index.html" target="_blank">game</a>
-            <a href="#" id="heroTodoBtn">todo & cal</a>
-            <a href="#" id="heroClickerBtn">clicker</a>
-            <a href="#" id="heroShopBtn">shop</a>
+            <div class="hero-game-dropdown-wrap">
+                <a href="game/index.html" target="_blank">game ▾</a>
+                <div class="hero-game-dropdown">
+                    <a href="game/index.html" target="_blank">🎯 Archer Master</a>
+                    <a href="clicker.html">🍅 Tomato Clicker & Shop</a>
+                </div>
+            </div>
         </div>
         <div class="stats">
             <img src="https://github-readme-stats-anuraghazra1.vercel.app/api?username=tomato332&show_icons=true&theme=dark&bg_color=0d1117&border_color=30363d&text_color=c9d1d9&icon_color=58a6ff" alt="GitHub Stats" />
         </div>
     </div>
 
-    <!-- Floating clicker panel -->
-    <div id="clicker-overlay"></div>
-    <div id="clicker-panel">
-        <button class="close-btn" id="closeClickerBtn">✕</button>
-        <div class="section-title">🍅 Tomato Clicker</div>
-        <div class="clicker-label">TOMATOES</div>
-        <div class="clicker-score" id="clicker-score">0</div>
-        <div class="clicker-tomato" id="clicker-tomato">🍅</div>
-        <div style="font-size:.6rem;color:var(--muted);font-family:'Press Start 2P',monospace;margin-bottom:12px;">→ CLICK THE TOMATO ←</div>
-        <div class="clicker-stat-row">
-            <span class="label">CLICK POWER</span>
-            <span class="value" id="clicker-power">+1</span>
-        </div>
-        <div class="clicker-stat-row">
-            <span class="label">AUTO CLICK /s</span>
-            <span class="value" id="clicker-auto">0</span>
-        </div>
-        <div style="margin-top:12px;border-top:2px solid var(--border);padding-top:12px;">
-            <button class="clicker-btn" id="upgrade-power" data-cost="10">⬆ UPGRADE POWER (10 🍅)</button>
-            <button class="clicker-btn" id="upgrade-auto" data-cost="25">⏰ AUTO CLICKER (25 🍅)</button>
-        </div>
-        <div style="margin-top:8px;font-size:.6rem;color:var(--muted);" id="clicker-stats">
-            TOTAL CLICKS: 0
-        </div>
-    </div>
-
-    <!-- Floating shop panel -->
-    <div id="shop-overlay"></div>
-    <div id="shop-panel">
-        <button class="close-btn" id="closeShopBtn">✕</button>
-        <div class="section-title">🛒 Decoration Shop</div>
-        <div class="shop-balance" id="shop-balance">🍅 0</div>
+    <!-- Floating shop panel (For background effect support) -->
+    <div id="shop-overlay" style="display:none;"></div>
+    <div id="shop-panel" style="display:none;">
+        <div id="shop-balance"></div>
         <div id="shop-items"></div>
-    </div>
-
-    <!-- Floating Todo & Calendar panel -->
-    <div id="todo-overlay"></div>
-    <div id="todo-panel">
-        <button class="close-btn" id="closeTodoBtn">✕</button>
-        <div class="section-title">📅 Calendar & 📋 Todo</div>
-        <div class="tc-container">
-            <!-- Calendar Section -->
-            <div class="cal-section">
-                <div class="cal-header">
-                    <button class="cal-nav-btn" id="calPrevBtn" data-tip="Prev Month">◀</button>
-                    <span class="cal-title" id="calTitle"></span>
-                    <div class="cal-nav-group">
-                        <select id="calCountrySelect" class="cal-country-select" data-tip="Select Country">
-                            <option value="KR">🇰🇷 KR</option>
-                            <option value="US">🇺🇸 US</option>
-                            <option value="JP">🇯🇵 JP</option>
-                            <option value="GB">🇬🇧 GB</option>
-                            <option value="DE">🇩🇪 DE</option>
-                            <option value="FR">🇫🇷 FR</option>
-                            <option value="CA">🇨🇦 CA</option>
-                            <option value="AU">🇦🇺 AU</option>
-                        </select>
-                        <button class="cal-nav-btn" id="calTodayBtn" data-tip="Jump to Today">TODAY</button>
-                        <button class="cal-nav-btn" id="calNextBtn" data-tip="Next Month">▶</button>
-                    </div>
-                </div>
-                <div class="cal-grid">
-                    <div class="cal-day-name">SU</div>
-                    <div class="cal-day-name">MO</div>
-                    <div class="cal-day-name">TU</div>
-                    <div class="cal-day-name">WE</div>
-                    <div class="cal-day-name">TH</div>
-                    <div class="cal-day-name">FR</div>
-                    <div class="cal-day-name">SA</div>
-                </div>
-                <div class="cal-grid" id="calGridDays"></div>
-            </div>
-
-            <!-- Todo Section -->
-            <div class="todo-section">
-                <div class="todo-header-wrap">
-                    <div class="todo-date-title" id="todoDateTitle">TODO</div>
-                    <div class="todo-holiday-badge" id="todoHolidayBadge" style="display:none;"></div>
-                </div>
-                <div class="todo-input-wrap">
-                    <input type="text" id="todoInput" class="todo-input" placeholder="New task..." />
-                    <button id="todoAddBtn" class="todo-add-btn" data-tip="Add Task">+</button>
-                </div>
-                <div class="todo-list" id="todoList"></div>
-            </div>
-        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>

@@ -6,13 +6,13 @@
 }
 
 .clock-digits {
-    display: flex; align-items: center; gap: 2px;
+    display: flex; align-items: center; gap: 4px;
     background: rgba(187, 154, 247, .06);
     border: 2px solid rgba(187, 154, 247, .15);
-    padding: 3px 6px;
+    padding: 6px 12px;
     font-family: 'Press Start 2P', monospace;
-    font-size: .45rem;
-    letter-spacing: 2px;
+    font-size: .75rem;
+    letter-spacing: 3px;
     transition: border-color .3s, background .3s;
 }
 
@@ -20,7 +20,7 @@
     display: inline-block;
     color: var(--accent3);
     text-shadow: 0 0 6px rgba(187, 154, 247, .5), 0 0 12px rgba(187, 154, 247, .2);
-    min-width: 10px;
+    min-width: 14px;
     text-align: center;
     transition: color .15s, text-shadow .15s;
 }
@@ -29,7 +29,7 @@
     display: inline-block;
     color: var(--accent3);
     text-shadow: 0 0 6px rgba(187, 154, 247, .5);
-    min-width: 8px;
+    min-width: 10px;
     text-align: center;
     opacity: .7;
     transition: opacity .15s;
@@ -42,12 +42,12 @@
 }
 
 .header.collapsed .clock-digits {
-    font-size: .35rem;
-    padding: 2px 4px;
-    gap: 1px;
+    font-size: .45rem;
+    padding: 3px 6px;
+    gap: 2px;
 }
 .header.collapsed .cd-digit {
-    min-width: 8px;
+    min-width: 10px;
 }
 .header.collapsed .cd-colon {
     min-width: 6px;

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>🍅 Tomato Clicker & Shop</title>
+    <link rel="icon" href="favicon.ico" sizes="any">
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/theme.css">
+    <link rel="stylesheet" href="css/clicker.css">
+    <link rel="stylesheet" href="css/shop.css">
+    <link rel="stylesheet" href="css/decorations.css">
+    <style>
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 24px 16px 48px;
+            background: var(--bg);
+        }
+        .clicker-page-header {
+            width: min(800px, 100%);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 12px;
+        }
+        .back-btn {
+            background: none;
+            border: 2px solid var(--muted);
+            color: var(--muted);
+            padding: 6px 12px;
+            font-family: 'Press Start 2P', monospace;
+            font-size: .6rem;
+            cursor: pointer;
+            transition: all .15s;
+        }
+        .back-btn:hover {
+            border-color: var(--accent2);
+            color: var(--accent2);
+            transform: translate(-1px, -1px);
+            box-shadow: 2px 2px 0 var(--accent);
+        }
+        .page-title {
+            font-family: 'Press Start 2P', monospace;
+            font-size: .8rem;
+            color: var(--accent2);
+            letter-spacing: 1px;
+        }
+        .clicker-game-container {
+            width: min(800px, 100%);
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        @media (max-width: 680px) {
+            .clicker-game-container {
+                grid-template-columns: 1fr;
+            }
+            .page-title { font-size: .65rem; }
+        }
+        .game-card {
+            background: var(--bg2);
+            border: 2px solid var(--border);
+            padding: 24px;
+            box-shadow: 4px 4px 0 var(--shadow);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        .shop-card {
+            background: var(--bg2);
+            border: 2px solid var(--border);
+            padding: 20px;
+            box-shadow: 4px 4px 0 var(--shadow);
+            display: flex;
+            flex-direction: column;
+        }
+        .shop-items-scroll {
+            max-height: 480px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+        .shop-items-scroll::-webkit-scrollbar { width: 4px; }
+        .shop-items-scroll::-webkit-scrollbar-thumb { background: var(--border); }
+    </style>
+</head>
+<body>
+    <div class="clicker-page-header">
+        <button class="back-btn" onclick="location.href='index.html'">◀ HOME</button>
+        <div class="page-title">🍅 CLICKER & SHOP</div>
+        <button class="theme-btn" onclick="toggleTheme()" aria-label="Toggle theme">🌙</button>
+    </div>
+
+    <div class="clicker-game-container">
+        <!-- Clicker Card -->
+        <div class="game-card">
+            <div class="section-title">🍅 Tomato Clicker</div>
+            <div class="clicker-label">TOMATOES</div>
+            <div class="clicker-score" id="clicker-score">0</div>
+            <div class="clicker-tomato" id="clicker-tomato">🍅</div>
+            <div style="font-size:.6rem;color:var(--muted);font-family:'Press Start 2P',monospace;margin-bottom:12px;">→ CLICK THE TOMATO ←</div>
+            
+            <div style="width:100%;">
+                <div class="clicker-stat-row">
+                    <span class="label">CLICK POWER</span>
+                    <span class="value" id="clicker-power">+1</span>
+                </div>
+                <div class="clicker-stat-row">
+                    <span class="label">AUTO CLICK /s</span>
+                    <span class="value" id="clicker-auto">0</span>
+                </div>
+            </div>
+
+            <div style="margin-top:12px;border-top:2px solid var(--border);padding-top:12px;width:100%;">
+                <button class="clicker-btn" id="upgrade-power" data-cost="10">⬆ UPGRADE POWER (10 🍅)</button>
+                <button class="clicker-btn" id="upgrade-auto" data-cost="25">⏰ AUTO CLICKER (25 🍅)</button>
+            </div>
+            <div style="margin-top:12px;font-size:.6rem;color:var(--muted);" id="clicker-stats">
+                TOTAL CLICKS: 0
+            </div>
+        </div>
+
+        <!-- Shop Card -->
+        <div class="shop-card">
+            <div class="section-title" style="text-align:center;">🛒 Decoration Shop</div>
+            <div class="shop-balance" id="shop-balance">🍅 0</div>
+            <div id="shop-items" class="shop-items-scroll"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initTheme, toggleTheme } from './src/theme.js';
+        import { initClicker } from './src/clicker.js';
+        import { initShop } from './src/shop.js';
+
+        window.toggleTheme = toggleTheme;
+
+        initTheme();
+        initClicker();
+        initShop();
+    </script>
+</body>
+</html>

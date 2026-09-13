@@ -2,6 +2,7 @@
 import { playTick } from './sound.js';
 import { getAudioCtx } from './sound.js';
 import { isBgmPlaying, setTrack, toggleBgm } from './bgm.js';
+import { renderCalendar, renderTodoList } from './todo-calendar.js';
 
 const FOCUS_TIME = 25 * 60; // 25분
 const BREAK_TIME = 5 * 60;  // 5분
@@ -147,6 +148,8 @@ export function initPomodoro() {
             if (playerOpen) {
                 const bgm = document.getElementById('bgm-player');
                 if (bgm) bgm.classList.remove('open');
+                renderCalendar();
+                renderTodoList();
             }
             player.classList.toggle('open', playerOpen);
             playTick('click');

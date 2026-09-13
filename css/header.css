@@ -4,22 +4,40 @@
     background: var(--bg);
     border-bottom: 2px solid var(--border);
     padding: 8px 20px;
-    display: flex; align-items: center; justify-content: center; gap: 10px;
-    transition: background .3s, padding .3s, gap .3s;
+    display: flex; align-items: center; justify-content: space-between;
+    transition: background .3s, padding .3s;
     overflow: visible;
     min-height: 48px;
 }
+.header-left {
+    display: flex; align-items: center; gap: 10px;
+    flex: 1;
+}
+.header-center {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.header-right {
+    display: flex; align-items: center; gap: 8px;
+    justify-content: flex-end;
+    flex: 1;
+}
 .header.collapsed {
     padding: 4px 20px;
-    gap: 4px;
     min-height: 34px;
 }
+.header.collapsed .header-left .name,
 .header.collapsed .header-links,
+.header.collapsed .header-center,
 .header.collapsed .header-toggle {
     display: none;
 }
 .header-bgm {
-    display: flex; align-items: center; gap: 4px;
+    display: flex; align-items: center; gap: 6px;
     transition: opacity .3s;
 }
 .header-bgm-btn {
@@ -51,8 +69,75 @@
 .header-toggle {
     background: none; border: 2px solid var(--muted);
     color: var(--muted); cursor: pointer;
-    padding: 4px 12px; font-size: .6rem; margin-left: 6px;
-    font-family: 'IBM Plex Mono', monospace;
+    padding: 4px 10px; font-size: .55rem;
+    font-family: 'Press Start 2P', monospace;
     transition: all .15s;
 }
 .header-toggle:hover { border-color: var(--accent2); color: var(--accent2); transform: translate(-1px, -1px); box-shadow: 2px 2px 0 var(--accent); }
+
+/* ── 테마 / 날씨 드롭다운 래퍼 ── */
+.theme-dropdown-wrap {
+    position: relative;
+    display: inline-block;
+}
+.weather-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 4px;
+    background: var(--bg2);
+    border: 2px solid var(--border);
+    padding: 8px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    box-shadow: 4px 4px 0 var(--shadow);
+    z-index: 100;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-4px);
+    transition: opacity .15s ease, transform .15s ease;
+}
+.weather-dropdown::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    left: 0;
+    right: 0;
+    height: 8px;
+}
+.theme-dropdown-wrap:hover .weather-dropdown {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+}
+.weather-dropdown-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    white-space: nowrap;
+}
+.weather-dropdown-label {
+    font-family: 'Press Start 2P', monospace;
+    font-size: .45rem;
+    color: var(--muted);
+}
+.weather-item-btn {
+    background: none;
+    border: 2px solid var(--border);
+    color: var(--text);
+    padding: 4px 8px;
+    font-size: .75rem;
+    cursor: pointer;
+    font-family: 'Press Start 2P', monospace;
+    transition: all .15s;
+}
+.weather-item-btn:hover {
+    border-color: var(--accent2);
+    color: var(--accent2);
+}
+.weather-item-btn.active {
+    border-color: var(--accent);
+    background: rgba(122,162,247,.15);
+}

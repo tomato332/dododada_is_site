@@ -427,6 +427,10 @@ function drawLoop() {
 function updateUI() {
     const weatherBtn = document.getElementById('weatherBtn');
     const thunderBtn = document.getElementById('thunderBtn');
+    const weatherClearBtn = document.getElementById('weatherClearBtn');
+    const weatherRainBtn = document.getElementById('weatherRainBtn');
+    const weatherSnowBtn = document.getElementById('weatherSnowBtn');
+    const weatherThunderToggleBtn = document.getElementById('weatherThunderToggleBtn');
 
     if (weatherBtn) {
         if (weatherMode === 'rain') {
@@ -442,6 +446,14 @@ function updateUI() {
             weatherBtn.classList.remove('active');
             weatherBtn.setAttribute('data-tip', 'Weather (Click for Rain)');
         }
+    }
+
+    if (weatherClearBtn) weatherClearBtn.classList.toggle('active', weatherMode === 'none');
+    if (weatherRainBtn) weatherRainBtn.classList.toggle('active', weatherMode === 'rain');
+    if (weatherSnowBtn) weatherSnowBtn.classList.toggle('active', weatherMode === 'snow');
+    if (weatherThunderToggleBtn) {
+        weatherThunderToggleBtn.classList.toggle('active', thunderEnabled);
+        weatherThunderToggleBtn.textContent = thunderEnabled ? '⚡ ON' : '⚡ OFF';
     }
 
     if (thunderBtn) {
@@ -526,6 +538,23 @@ export function initWeather() {
             playTick('click');
         };
     }
+
+    document.getElementById('weatherClearBtn')?.addEventListener('click', () => {
+        setWeather('none');
+        playTick('click');
+    });
+    document.getElementById('weatherRainBtn')?.addEventListener('click', () => {
+        setWeather('rain');
+        playTick('click');
+    });
+    document.getElementById('weatherSnowBtn')?.addEventListener('click', () => {
+        setWeather('snow');
+        playTick('click');
+    });
+    document.getElementById('weatherThunderToggleBtn')?.addEventListener('click', () => {
+        toggleThunder();
+        playTick('click');
+    });
 
     updateUI();
 }

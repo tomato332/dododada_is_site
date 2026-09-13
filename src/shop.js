@@ -208,13 +208,13 @@ export function initShop() {
     const panel = document.getElementById('shop-panel');
     const overlay = document.getElementById('shop-overlay');
 
-    function show() { panel.classList.add('show'); overlay.classList.add('show'); renderShop(); }
-    function hide() { panel.classList.remove('show'); overlay.classList.remove('show'); }
+    function show() { if (panel && overlay) { panel.classList.add('show'); overlay.classList.add('show'); renderShop(); } }
+    function hide() { if (panel && overlay) { panel.classList.remove('show'); overlay.classList.remove('show'); } }
 
-    document.getElementById('headerShopBtn').onclick = e => { e.preventDefault(); show(); };
-    document.getElementById('heroShopBtn').onclick = e => { e.preventDefault(); show(); };
-    document.getElementById('closeShopBtn').onclick = hide;
-    overlay.onclick = hide;
+    if (document.getElementById('headerShopBtn')) document.getElementById('headerShopBtn').onclick = e => { e.preventDefault(); show(); };
+    if (document.getElementById('heroShopBtn')) document.getElementById('heroShopBtn').onclick = e => { e.preventDefault(); show(); };
+    if (document.getElementById('closeShopBtn')) document.getElementById('closeShopBtn').onclick = hide;
+    if (overlay) overlay.onclick = hide;
 
     applyDecorations();
     renderShop();

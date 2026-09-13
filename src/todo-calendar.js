@@ -76,6 +76,8 @@ async function fetchHolidays(year, country) {
     }
 }
 
+export { renderCalendar, renderTodoList };
+
 export function initTodoCalendar() {
     loadTodos();
 
@@ -118,7 +120,8 @@ export function initTodoCalendar() {
     if (overlay) overlay.onclick = () => closePanel();
 
     // Calendar Navigation
-    document.getElementById('calPrevBtn')?.addEventListener('click', () => {
+    document.getElementById('calPrevBtn')?.addEventListener('click', (e) => {
+        e.stopPropagation();
         const prevYear = currentYear;
         currentMonth--;
         if (currentMonth < 0) {
@@ -132,7 +135,8 @@ export function initTodoCalendar() {
         }
     });
 
-    document.getElementById('calTodayBtn')?.addEventListener('click', () => {
+    document.getElementById('calTodayBtn')?.addEventListener('click', (e) => {
+        e.stopPropagation();
         const today = new Date();
         const prevYear = currentYear;
         currentYear = today.getFullYear();
@@ -147,7 +151,8 @@ export function initTodoCalendar() {
         playTick('click');
     });
 
-    document.getElementById('calNextBtn')?.addEventListener('click', () => {
+    document.getElementById('calNextBtn')?.addEventListener('click', (e) => {
+        e.stopPropagation();
         const prevYear = currentYear;
         currentMonth++;
         if (currentMonth > 11) {
@@ -243,7 +248,8 @@ function renderCalendar() {
             cell.appendChild(dot);
         }
 
-        cell.onclick = () => {
+        cell.onclick = (e) => {
+            e.stopPropagation();
             selectedDateStr = dateStr;
             renderCalendar();
             renderTodoList();
@@ -292,7 +298,8 @@ function renderTodoList() {
         chk.type = 'checkbox';
         chk.className = 'todo-check';
         chk.checked = item.done;
-        chk.onchange = () => {
+        chk.onchange = (e) => {
+            e.stopPropagation();
             item.done = chk.checked;
             saveTodos();
             renderTodoList();
@@ -310,7 +317,8 @@ function renderTodoList() {
         const delBtn = document.createElement('button');
         delBtn.className = 'todo-del-btn';
         delBtn.textContent = '✕';
-        delBtn.onclick = () => {
+        delBtn.onclick = (e) => {
+            e.stopPropagation();
             todos[selectedDateStr] = todos[selectedDateStr].filter(t => t.id !== item.id);
             if (todos[selectedDateStr].length === 0) {
                 delete todos[selectedDateStr];
